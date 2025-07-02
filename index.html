@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Gold Rush!</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('https://placehold.co/1200x800/000000/FFFFFF?text=Space+Background');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw; 
+            height: 100vh; 
+            margin: 0;
+            padding: 0; 
+            box-sizing: border-box;
+            color: #e2e8f0; 
+            overflow: hidden; 
+        }
+
+        .game-wrapper {
+            background-color: rgba(45, 55, 72, 0.95); 
+            border-radius: 0; 
+            box-shadow: none;
+            padding: 0.5rem;
+            text-align: center;
+            width: 100%; 
+            height: 100%;
+            max-width: none; 
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem; 
+        }
+
+        canvas {
+            background-color: #000000; 
+            border: 2px solid #4a5568; 
+            border-radius: 0;
+            display: block;
+            margin: 0 auto;
+            touch-action: none; 
+            width: 100%; 
+            flex-grow: 1;
+        }
+        .upgrade-section, .ship-model-section, .leaderboard-section, .shop-section {
+            background-color: rgba(44, 62, 80, 0.9); 
+            border-radius: 0.75rem; 
+            padding: 0.75rem; /* Reduced padding */
+            margin-top: 0; /* No top margin, managed by parent gap */
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem; /* Reduced gap */
+            flex-shrink: 0; /* Prevent these from shrinking too much */
+        }
+
+        .upgrade-buttons, .ship-model-nav, .shop-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem; /* Reduced gap */
+        }
+
+        .upgrade-button, .start-button, .leaderboard-button, .nav-button, .shop-button {
+            background-color: #4a90e2; /* Blue for upgrades */
+            color: white;
+            font-weight: 700;
+            padding: 0.6rem 0.9rem; /* Reduced padding */
+            border-radius: 0.6rem; /* Slightly smaller border radius */
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Smaller shadow */
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem; /* Reduced gap */
+            font-size: 0.85rem; /* Smaller font */
+            flex-grow: 1; /* Allow buttons to grow */
+            justify-content: center; /* Center content */
+            min-width: 80px; /* Ensure buttons don't get too small */
+        }
+
+        .start-button {
+            background-color: #48bb78; /* Green for start */
+            font-weight: 800;
+            padding: 0.7rem 1.2rem; /* Reduced padding */
+            font-size: 0.95rem; /* Slightly larger font */
+        }
+
+        .upgrade-button:hover:not(:disabled), .start-button:hover:not(:disabled), .leaderboard-button:hover:not(:disabled), .nav-button:hover:not(:disabled), .shop-button:hover:not(:disabled) {
+            background-color: #357ABD;
+            transform: translateY(-1px); /* Smaller transform */
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Smaller shadow */
+        }
+
+        .upgrade-button:disabled, .nav-button:disabled, .shop-button:disabled {
+            background-color: #4a5568;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .message-box {
+            background-color: #fefcbf;
+            border: 1px solid #fbd38d;
+            color: #975a16;
+            padding: 0.7rem; /* Reduced padding */
+            border-radius: 0.6rem;
+            margin-top: 0; /* No top margin, managed by parent gap */
+            font-weight: 600;
+            display: none;
+            font-size: 0.8rem; /* Smaller font */
+        }
+
+        .message-box.show {
+            display: block;
+        }
+
+        .boss-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            font-weight: bold;
+            color: red;
+            text-shadow: 0 0 10px black, 0 0 20px red;
+            z-index: 10;
+            animation: bossAppear 1s forwards;
+            display: none;
+        }
+
+        .boss-message.show {
+            display: block;
+        }
+
+        @keyframes bossAppear {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            70% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .powerup-bubble {
+            background-color: rgba(173, 216, 230, 0.8); /* Light blue, semi-transparent */
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px; /* Bigger powerup bubble */
+            height: 60px;
+            position: absolute;
+            animation: bubbleFloat 3s infinite ease-in-out;
+            box-shadow: 0 0 8px rgba(173, 216, 230, 0.7);
+        }
+
+        @keyframes bubbleFloat {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        .powerup-bubble .emoji {
+            font-size: 2.5rem; /* Bigger emoji */
+        }
+
+        .ship-model-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem; /* Reduced gap */
+            padding: 0.4rem; /* Reduced padding */
+            border: 1px solid #4a5568;
+            border-radius: 0.6rem;
+            background-color: rgba(30, 41, 59, 0.7); /* Darker, more transparent */
+            margin-bottom: 0.6rem;
+        }
+
+        .ship-model-display img {
+            max-width: 120px; /* Adjusted size for mobile */
+            height: auto;
+            image-rendering: pixelated; /* For crisp emoji-like images */
+        }
+
+        .ship-stats-table {
+            width: 100%;
+            font-size: 0.8rem; /* Smaller font */
+            text-align: left;
+            margin-top: 0.4rem;
+        }
+
+        .ship-stats-table th, .ship-stats-table td {
+            padding: 0.15rem 0.4rem; /* Reduced padding */
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .ship-stats-table th {
+            color: #a0aec0;
+        }
+
+        .leaderboard-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85); /* Slightly darker overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            display: none;
+        }
+
+        .leaderboard-modal-content {
+            background-color: #2d3748;
+            padding: 1.5rem; /* Reduced padding */
+            border-radius: 0.8rem; /* Slightly smaller border radius */
+            max-width: 95%; /* Max width for mobile */
+            width: 95%;
+            text-align: left;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Smaller shadow */
+            max-height: 95vh; /* Limit height on mobile */
+            overflow-y: auto; /* Scroll if content overflows */
+        }
+
+        .leaderboard-modal-content h2 {
+            font-size: 1.8rem; /* Smaller font */
+            font-weight: bold;
+            color: white;
+            margin-bottom: 1rem; /* Reduced margin */
+            text-align: center;
+        }
+
+        .leaderboard-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .leaderboard-list li {
+            background-color: #1a202c;
+            padding: 0.6rem 0.8rem; /* Reduced padding */
+            margin-bottom: 0.4rem; /* Reduced margin */
+            border-radius: 0.4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem; /* Smaller font */
+            color: #cbd5e0;
+        }
+
+        .leaderboard-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .leaderboard-close-btn {
+            background-color: #e53e3e;
+            color: white;
+            font-weight: 700;
+            padding: 0.6rem 1rem; /* Reduced padding */
+            border-radius: 0.6rem;
+            transition: all 0.2s ease-in-out;
+            margin-top: 1rem; /* Reduced margin */
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .leaderboard-close-btn:hover {
+            background-color: #c53030;
+        }
+
+        /* Responsive adjustments for overall layout */
+        @media (max-width: 768px) {
+            .game-wrapper {
+                padding: 0.5rem;
+                gap: 0.5rem;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .upgrade-section, .ship-model-section, .leaderboard-section, .shop-section {
+                padding: 0.6rem;
+                gap: 0.4rem;
+            }
+            .upgrade-button, .start-button, .leaderboard-button, .nav-button, .shop-button {
+                padding: 0.5rem 0.7rem;
+                font-size: 0.75rem;
+            }
+            .message-box {
+                font-size: 0.75rem;
+                padding: 0.6rem;
+            }
+            .boss-message {
+                font-size: 3rem;
+            }
+            .powerup-bubble {
+                width: 50px;
+                height: 50px;
+            }
+            .powerup-bubble .emoji {
+                font-size: 2rem;
+            }
+            .ship-model-display img {
+                max-width: 100px;
+            }
+            .ship-stats-table {
+                font-size: 0.7rem;
+            }
+            .leaderboard-modal-content {
+                padding: 1rem;
+            }
+            .leaderboard-modal-content h2 {
+                font-size: 1.5rem;
+            }
+            .leaderboard-list li {
+                font-size: 0.85rem;
+                padding: 0.5rem 0.7rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-wrapper {
+                padding: 0.2rem;
+                gap: 0.2rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .upgrade-buttons, .ship-model-nav, .shop-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .upgrade-button, .start-button, .leaderboard-button, .nav-button, .shop-button {
+                width: 100%;
+                font-size: 0.8rem;
+                padding: 0.6rem;
+            }
+            .ship-model-display img {
+                max-width: 80px;
+            }
+            .ship-stats-table {
+                font-size: 0.65rem;
+            }
+            .boss-message {
+                font-size: 2.5rem;
+            }
+            .powerup-bubble {
+                width: 45px;
+                height: 45px;
+            }
+            .powerup-bubble .emoji {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 flex items-center justify-center">
+    <div class="game-wrapper">
+        <h1 class="text-4xl font-extrabold text-white">Galactic Gold Rush!</h1>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="bossMessage" class="boss-message">BOSS</div>
+
+        <button id="startButton" class="start-button">Start Game</button>
+
+        <div id="messageBox" class="message-box show">
+            Welcome, pilot! Destroy aliens, collect gold, and upgrade your ship! Use A/D or Left/Right arrows to move, Spacebar to shoot. On mobile, tap to shoot continuously, swipe to move.
+        </div>
+
+        <div class="ship-model-section">
+            <h2 class="text-2xl font-bold text-white">Ship Models</h2>
+            <div class="ship-model-display">
+                <div class="flex items-center justify-center w-full">
+                    <button id="prevShipBtn" class="nav-button bg-gray-700 hover:bg-gray-600 w-10 h-10 p-0 rounded-full flex items-center justify-center text-lg">&lt;</button>
+                    <img id="currentShipImage" src="" alt="Spaceship" class="mx-4">
+                    <button id="nextShipBtn" class="nav-button bg-gray-700 hover:bg-gray-600 w-10 h-10 p-0 rounded-full flex items-center justify-center text-lg">&gt;</button>
+                </div>
+                <h3 id="currentShipName" class="text-xl font-semibold text-white"></h3>
+                <table class="ship-stats-table">
+                    <thead>
+                        <tr>
+                            <th>Stat</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Base Health</td><td id="shipBaseHealth"></td></tr>
+                        <tr><td>Base Firepower</td><td id="shipBaseFirepower"></td></tr>
+                        <tr><td>Base Speed</td><td id="shipBaseSpeed"></td></tr>
+                    </tbody>
+                </table>
+                <button id="upgradeShipModelBtn" class="upgrade-button bg-purple-600 hover:bg-purple-700">
+                    Upgrade Ship Model (<span id="shipModelCost">0</span> 💰)
+                </button>
+            </div>
+        </div>
+
+        <div class="upgrade-section">
+            <h2 class="text-2xl font-bold text-white">Current Ship Upgrades</h2>
+            <div class="upgrade-buttons">
+                <button id="upgradeHealthBtn" class="upgrade-button">
+                    Health (<span id="healthCost">50</span> 💰)
+                </button>
+                <button id="upgradeFirepowerBtn" class="upgrade-button">
+                    Firepower (<span id="firepowerCost">75</span> 💰)
+                </button>
+                <button id="upgradeSpeedBtn" class="upgrade-button">
+                    Speed (<span id="speedCost">60</span> 💰)
+                </button>
+            </div>
+        </div>
+
+        <div class="shop-section">
+            <h2 class="text-2xl font-bold text-white">Shop</h2>
+            <div class="shop-buttons">
+                <input type="text" id="couponCodeInput" placeholder="Enter coupon code" class="p-2 rounded-md bg-gray-700 text-white placeholder-gray-400 flex-grow">
+                <button id="redeemCouponBtn" class="shop-button bg-yellow-600 hover:bg-yellow-700">Redeem</button>
+                <button id="purchaseCoinsBtn" class="shop-button bg-green-600 hover:bg-green-700">Purchase Coins</button>
+            </div>
+        </div>
+
+        <button id="showLeaderboardBtn" class="leaderboard-button bg-blue-600 hover:bg-blue-700">
+            Show Leaderboard
+        </button>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" class="leaderboard-modal">
+        <div class="leaderboard-modal-content">
+            <h2>Leaderboard</h2>
+            <ul id="leaderboardList" class="leaderboard-list">
+                <!-- Leaderboard entries will be inserted here -->
+            </ul>
+            <button id="closeLeaderboardBtn" class="leaderboard-close-btn">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startButton = document.getElementById('startButton');
+        const messageBox = document.getElementById('messageBox');
+        const bossMessage = document.getElementById('bossMessage');
+
+        const upgradeHealthBtn = document.getElementById('upgradeHealthBtn');
+        const upgradeFirepowerBtn = document.getElementById('upgradeFirepowerBtn');
+        const upgradeSpeedBtn = document.getElementById('upgradeSpeedBtn');
+        const healthCostDisplay = document.getElementById('healthCost');
+        const firepowerCostDisplay = document.getElementById('firepowerCost');
+        const speedCostDisplay = document.getElementById('speedCost');
+
+        const shipModelSection = document.querySelector('.ship-model-section');
+        const prevShipBtn = document.getElementById('prevShipBtn');
+        const nextShipBtn = document.getElementById('nextShipBtn');
+        const currentShipImage = document.getElementById('currentShipImage');
+        const currentShipName = document.getElementById('currentShipName');
+        const shipBaseHealthDisplay = document.getElementById('shipBaseHealth');
+        const shipBaseFirepowerDisplay = document.getElementById('shipBaseFirepower');
+        const shipBaseSpeedDisplay = document.getElementById('shipBaseSpeed');
+        const upgradeShipModelBtn = document.getElementById('upgradeShipModelBtn');
+        const shipModelCostDisplay = document.getElementById('shipModelCost');
+
+        const couponCodeInput = document.getElementById('couponCodeInput');
+        const redeemCouponBtn = document.getElementById('redeemCouponBtn');
+        const purchaseCoinsBtn = document.getElementById('purchaseCoinsBtn');
+
+        const showLeaderboardBtn = document.getElementById('showLeaderboardBtn');
+        const leaderboardModal = document.getElementById('leaderboardModal');
+        const leaderboardList = document.getElementById('leaderboardList');
+        const closeLeaderboardBtn = document.getElementById('closeLeaderboardBtn');
+
+        // --- Game State Variables ---
+        let gameActive = false;
+        let score = 0;
+        let gold = 0;
+        let currentLevel = 1; // Tracks game difficulty level
+        let player = {};
+        let bullets = [];
+        let aliens = [];
+        let alienBullets = []; // Bullets fired by aliens
+        let coins = [];
+        let powerUps = []; // Array to hold active power-ups
+        let companionShips = []; // For companion power-up
+
+        let keys = {}; // Object to track pressed keys
+        let touchActive = false; // Flag for continuous firing on touch
+        let touchStartX = 0; // For swipe movement
+
+        let alienSpawnInterval = 1500;
+        let lastAlienSpawnTime = 0;
+        let gameSpeedMultiplier = 1;
+
+        let currentBoss = null; // Holds the active boss object
+        let bossTimerInterval = 40000; // 40 seconds
+        let lastBossSpawnTime = 0;
+
+        // --- Upgrade Costs and Levels ---
+        const UPGRADE_BASE_COST = {
+            health: 50,
+            firepower: 75,
+            speed: 60,
+            shipModel: 200 // Base cost for upgrading ship model
+        };
+        const UPGRADE_COST_MULTIPLIER = 1.5;
+
+        let upgradeLevels = {
+            health: 0,
+            firepower: 0,
+            speed: 0,
+            shipModel: 0 // Current ship model index
+        };
+
+        // --- Power-up Timers and States ---
+        let doubleShotActive = false;
+        let doubleShotTimer = null;
+        let companionActive = false;
+        let companionTimer = null;
+        let shieldActive = false;
+        let shieldTimer = null;
+
+        // --- Game Assets (Images) ---
+        const images = {}; // Object to store preloaded images
+
+        const IMAGE_PATHS = {
+            background: 'https://placehold.co/1200x800/000000/FFFFFF?text=Space+Background', // Placeholder, ideally a real space image
+            // Player Ships
+            playerShip1: 'https://i.ibb.co/6cR3j2d3/Untitled-design-34-removebg-preview.png',
+            playerShip2: 'https://i.ibb.co/DfJDpsMw/Untitled-design-35-removebg-preview.png',
+            playerShip3: 'https://i.ibb.co/fz6Rb13x/Untitled-design-36-removebg-preview.png',
+            playerShip4: 'https://i.ibb.co/WpyFRDHm/Untitled-design-37-removebg-preview.png',
+            playerShip5: 'https://i.ibb.co/5Wn7mNXr/Untitled-design-38-removebg-preview.png',
+            playerShip6: 'https://i.ibb.co/gh5ZtWG/Untitled-design-39-removebg-preview.png',
+            // Regular Aliens
+            alien1: 'https://i.ibb.co/Ld7ZLftG/Untitled-design-22-removebg-preview.png', // Easy
+            alien2: 'https://i.ibb.co/DDnZntnb/Untitled-design-23-removebg-preview.png', // Better
+            alien3: 'https://i.ibb.co/v6DGkNCr/Untitled-design-24-removebg-preview.png', // Shoots laser
+            alien4: 'https://i.ibb.co/yFmXgV2D/Untitled-design-25-removebg-preview.png', // Can attack
+            alien5: 'https://i.ibb.co/0jDsVF7j/Untitled-design-26-removebg-preview.png', // Can attack
+            alien6: 'https://i.ibb.co/CKKPRVm5/Untitled-design-27-removebg-preview.png', // Last Alien, can attack
+            // Bosses
+            boss1: 'https://i.ibb.co/5XpK6bpX/Untitled-design-28-removebg-preview.png',
+            boss2: 'https://i.ibb.co/TMyYkGRj/Untitled-design-29-removebg-preview.png',
+            boss3: 'https://i.ibb.co/NnZ4hxHV/Untitled-design-30-removebg-preview.png',
+            boss4: 'https://i.ibb.co/1frCq5bT/Untitled-design-31-removebg-preview.png',
+            boss5: 'https://i.ibb.co/gHxGvS7/Untitled-design-32-removebg-preview.png',
+            boss6: 'https://i.ibb.co/GfpcdVWR/Untitled-design-33-removebg-preview.png',
+        };
+
+        // --- Ship Model Data ---
+        const SHIP_MODELS = [
+            { name: "Scout", image: 'playerShip1', baseHealth: 100, baseFirepower: 10, baseSpeed: 5 },
+            { name: "Interceptor", image: 'playerShip2', baseHealth: 120, baseFirepower: 15, baseSpeed: 6 },
+            { name: "Cruiser", image: 'playerShip3', baseHealth: 150, baseFirepower: 20, baseSpeed: 7 },
+            { name: "Destroyer", image: 'playerShip4', baseHealth: 180, baseFirepower: 25, baseSpeed: 8 },
+            { name: "Battleship", image: 'playerShip5', baseHealth: 220, baseFirepower: 30, baseSpeed: 9 },
+            { name: "Dreadnought", image: 'playerShip6', baseHealth: 270, baseFirepower: 35, baseSpeed: 10 }
+        ];
+        let currentShipModelIndex = 0;
+
+        // --- Game Entities (Classes) ---
+
+        /**
+         * Represents the player's spaceship.
+         */
+        class Player {
+            constructor() {
+                this.baseWidth = 80; // Increased size
+                this.baseHeight = 80; // Increased size
+                this.width = this.baseWidth;
+                this.height = this.baseHeight;
+                this.x = canvas.width / 2 - this.width / 2;
+                this.y = canvas.height - this.height - 40; // Adjusted starting position
+                this.baseSpeed = SHIP_MODELS[upgradeLevels.shipModel].baseSpeed;
+                this.speed = this.baseSpeed;
+                this.baseHealth = SHIP_MODELS[upgradeLevels.shipModel].baseHealth;
+                this.health = this.baseHealth;
+                this.maxHealth = this.baseHealth;
+                this.baseFirepower = SHIP_MODELS[upgradeLevels.shipModel].baseFirepower;
+                this.firepower = this.baseFirepower;
+                this.baseFireRate = 300; // Milliseconds between shots
+                this.fireRate = this.baseFireRate;
+                this.lastShotTime = 0;
+                this.image = images[SHIP_MODELS[upgradeLevels.shipModel].image]; // Load image based on model
+            }
+
+            draw() {
+                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                // Draw shield if active
+                if (shieldActive) {
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 1.5, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.7)';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+            }
+
+            update() {
+                if (keys['ArrowLeft'] || keys['a']) {
+                    this.x -= this.speed;
+                }
+                if (keys['ArrowRight'] || keys['d']) {
+                    this.x += this.speed;
+                }
+
+                // Keep player within canvas bounds
+                if (this.x < 0) this.x = 0;
+                if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
+
+                // Handle shooting (keyboard and touch)
+                if ((keys['Space'] || touchActive) && (Date.now() - this.lastShotTime > this.fireRate)) {
+                    this.shoot();
+                    this.lastShotTime = Date.now();
+                }
+            }
+
+            shoot() {
+                bullets.push(new Bullet(this.x + this.width / 2 - 10, this.y, this.firepower, 'player')); // Bullet size adjusted
+                if (doubleShotActive) {
+                    bullets.push(new Bullet(this.x + this.width / 2 - 30, this.y, this.firepower, 'player')); // Left bullet
+                    bullets.push(new Bullet(this.x + this.width / 2 + 10, this.y, this.firepower, 'player'));  // Right bullet
+                }
+            }
+
+            takeDamage(damage) {
+                if (shieldActive) return; // Invincible with shield
+                this.health -= damage;
+                if (this.health <= 0) {
+                    this.health = 0;
+                    gameOver();
+                }
+                // No need to update UI here, it's done in gameLoop
+            }
+
+            heal(amount) {
+                this.health = Math.min(this.maxHealth, this.health + amount);
+                // No need to update UI here, it's done in gameLoop
+            }
+        }
+
+        /**
+         * Represents a bullet.
+         */
+        class Bullet {
+            constructor(x, y, damage, type) {
+                this.x = x;
+                this.y = y;
+                this.width = 20; // Increased size
+                this.height = 40; // Increased size
+                this.speed = (type === 'player') ? 15 : 8; // Increased speed for player bullets
+                this.damage = damage;
+                this.emoji = (type === 'player') ? '⚡' : '🔥'; // Player bullet vs Alien bullet
+                this.type = type; // 'player' or 'alien'
+            }
+
+            draw() {
+                ctx.font = `${this.height}px Arial`;
+                ctx.fillText(this.emoji, this.x, this.y);
+            }
+
+            update() {
+                if (this.type === 'player') {
+                    this.y -= this.speed;
+                } else {
+                    this.y += this.speed;
+                }
+            }
+        }
+
+        /**
+         * Represents an alien enemy.
+         */
+        class Alien {
+            constructor(x, y, typeData, level) { // Renamed type to typeData for clarity
+                this.x = x;
+                this.y = y;
+                this.width = 70; // Increased size
+                this.height = 70; // Increased size
+                this.type = typeData; // 'easy', 'medium', 'shooter', 'sticky' etc.
+                this.image = images[typeData.image];
+                this.baseSpeed = typeData.speed;
+                this.speed = this.baseSpeed * gameSpeedMultiplier;
+                this.baseHealth = typeData.health;
+                this.health = this.baseHealth;
+                this.damage = typeData.damage || 0;
+                this.fireRate = typeData.fireRate || 0;
+                this.lastShotTime = 0;
+                this.goldValue = typeData.goldValue;
+                this.scoreValue = typeData.scoreValue;
+                this.isSticky = typeData.isSticky || false; // For aliens that don't move down
+            }
+
+            draw() {
+                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            }
+
+            update() {
+                if (!this.isSticky) {
+                    this.y += this.speed;
+                }
+
+                // Alien shooting logic
+                if (this.fireRate > 0 && Date.now() - this.lastShotTime > this.fireRate) {
+                    alienBullets.push(new Bullet(this.x + this.width / 2 - 10, this.y + this.height, this.damage, 'alien'));
+                    this.lastShotTime = Date.now();
+                }
+            }
+
+            takeDamage(damage) {
+                this.health -= damage;
+                return this.health <= 0;
+            }
+        }
+
+        // Alien types configuration
+        const ALIEN_TYPES = {
+            easy: { image: 'alien1', health: 40, speed: 1, goldValue: 10, scoreValue: 100, damage: 0, fireRate: 0 },
+            medium: { image: 'alien2', health: 60, speed: 1.2, goldValue: 15, scoreValue: 150, damage: 0, fireRate: 0 },
+            shooter1: { image: 'alien3', health: 80, speed: 1.5, goldValue: 20, scoreValue: 200, damage: 10, fireRate: 1500 }, // Sometimes shoots laser
+            shooter2: { image: 'alien4', health: 100, speed: 1.8, goldValue: 25, scoreValue: 250, damage: 15, fireRate: 1200 },
+            shooter3: { image: 'alien5', health: 120, speed: 2.0, goldValue: 30, scoreValue: 300, damage: 20, fireRate: 1000 },
+            shooter4: { image: 'alien6', health: 140, speed: 2.2, goldValue: 35, scoreValue: 350, damage: 25, fireRate: 800 },
+            sticky: { image: 'alien5', health: 150, speed: 0, goldValue: 50, scoreValue: 500, damage: 30, fireRate: 700, isSticky: true } // Special sticky alien
+        };
+
+        /**
+         * Represents a boss alien.
+         */
+        class Boss {
+            constructor(level) {
+                const bossData = BOSS_DATA[`boss${level}`];
+                this.image = images[bossData.image];
+                this.width = bossData.width;
+                this.height = bossData.height;
+                this.x = canvas.width / 2 - this.width / 2;
+                this.y = -this.height; // Start off-screen
+                this.health = bossData.health;
+                this.maxHealth = bossData.health;
+                this.speed = bossData.speed;
+                this.damage = bossData.damage;
+                this.fireRate = bossData.fireRate;
+                this.lastShotTime = 0;
+                this.goldValue = bossData.goldValue;
+                this.scoreValue = bossData.scoreValue;
+                this.attackPattern = bossData.attackPattern; // 'straight', 'spread', 'zigzag'
+                this.moveDirection = 1; // 1 for right, -1 for left
+            }
+
+            draw() {
+                ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                // Draw health bar
+                const healthBarWidth = this.width;
+                const healthBarHeight = 15; // Bigger health bar
+                const healthBarY = this.y + this.height + 10; // Position below boss
+                ctx.fillStyle = 'gray';
+                ctx.fillRect(this.x, healthBarY, healthBarWidth, healthBarHeight);
+                ctx.fillStyle = 'red';
+                ctx.fillRect(this.x, healthBarY, healthBarWidth * (this.health / this.maxHealth), healthBarHeight);
+            }
+
+            update() {
+                // Boss entry animation
+                if (this.y < 50) { // Move down to fixed position
+                    this.y += this.speed;
+                    if (this.y >= 50) this.y = 50;
+                } else {
+                    // Regular movement patterns
+                    if (this.attackPattern === 'zigzag' || this.attackPattern === 'spread') {
+                        this.x += this.speed * this.moveDirection;
+                        if (this.x < 0 || this.x + this.width > canvas.width) {
+                            this.moveDirection *= -1; // Reverse direction
+                        }
+                    }
+                }
+
+                // Boss shooting logic
+                if (Date.now() - this.lastShotTime > this.fireRate) {
+                    this.shoot();
+                    this.lastShotTime = Date.now();
+                }
+            }
+
+            shoot() {
+                if (this.attackPattern === 'straight' || this.attackPattern === 'zigzag') {
+                    alienBullets.push(new Bullet(this.x + this.width / 2 - 10, this.y + this.height, this.damage, 'alien'));
+                } else if (this.attackPattern === 'spread') {
+                    alienBullets.push(new Bullet(this.x + this.width / 2 - 40, this.y + this.height, this.damage, 'alien'));
+                    alienBullets.push(new Bullet(this.x + this.width / 2, this.y + this.height, this.damage, 'alien'));
+                    alienBullets.push(new Bullet(this.x + this.width / 2 + 40, this.y + this.height, this.damage, 'alien'));
+                }
+            }
+
+            takeDamage(damage) {
+                this.health -= damage;
+                return this.health <= 0;
+            }
+        }
+
+        // Boss data configuration
+        const BOSS_DATA = {
+            boss1: { image: 'boss1', health: 30 * 10, width: 160, height: 160, speed: 1.5, damage: 20, fireRate: 1000, goldValue: 500, scoreValue: 1000, attackPattern: 'straight' },
+            boss2: { image: 'boss2', health: 30 * 12, width: 170, height: 170, speed: 1.8, damage: 25, fireRate: 900, goldValue: 600, scoreValue: 1200, attackPattern: 'zigzag' },
+            boss3: { image: 'boss3', health: 30 * 15, width: 180, height: 180, speed: 2.0, damage: 30, fireRate: 800, goldValue: 750, scoreValue: 1500, attackPattern: 'spread' },
+            boss4: { image: 'boss4', health: 30 * 18, width: 190, height: 190, speed: 2.2, damage: 35, fireRate: 700, goldValue: 900, scoreValue: 1800, attackPattern: 'zigzag' },
+            boss5: { image: 'boss5', health: 30 * 22, width: 200, height: 200, speed: 2.5, damage: 40, fireRate: 600, goldValue: 1100, scoreValue: 2200, attackPattern: 'spread' },
+            boss6: { image: 'boss6', health: 30 * 25, width: 210, height: 210, speed: 2.8, damage: 45, fireRate: 500, goldValue: 1300, scoreValue: 2500, attackPattern: 'straight' }
+        };
+
+        /**
+         * Represents a gold coin.
+         */
+        class Coin {
+            constructor(x, y, value) {
+                this.x = x;
+                this.y = y;
+                this.width = 40; // Increased size
+                this.height = 40; // Increased size
+                this.speed = 3;
+                this.value = value;
+                this.emoji = '💰';
+            }
+
+            draw() {
+                ctx.font = `${this.height}px Arial`;
+                ctx.fillText(this.emoji, this.x, this.y + this.height);
+            }
+
+            update() {
+                this.y += this.speed;
+            }
+        }
+
+        /**
+         * Represents a power-up.
+         */
+        class PowerUp {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.width = 60; // Increased size
+                this.height = 60; // Increased size
+                this.speed = 2;
+                this.type = type; // 'nuke', 'doubleShot', 'companion', 'healthBoost', 'shield'
+                this.emoji = this.getEmoji(type);
+            }
+
+            getEmoji(type) {
+                switch (type) {
+                    case 'nuke': return '💥';
+                    case 'doubleShot': return '⚡';
+                    case 'companion': return '🤖';
+                    case 'healthBoost': return '➕';
+                    case 'shield': return '🛡️';
+                    default: return '❓';
+                }
+            }
+
+            draw() {
+                // Draw bubble
+                ctx.beginPath();
+                ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(173, 216, 230, 0.6)'; // Light blue, semi-transparent
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(173, 216, 230, 0.9)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw emoji
+                ctx.font = `${this.height * 0.7}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.emoji, this.x + this.width / 2, this.y + this.height / 2);
+                ctx.textAlign = 'left'; // Reset for other drawings
+                ctx.textBaseline = 'alphabetic'; // Reset for other drawings
+            }
+
+            update() {
+                this.y += this.speed;
+            }
+        }
+
+        // --- Game Functions ---
+
+        /**
+         * Preloads all necessary images before starting the game.
+         * @returns {Promise<void>} A promise that resolves when all images are loaded.
+         */
+        function preloadImages() {
+            const promises = [];
+            for (const key in IMAGE_PATHS) {
+                const img = new Image();
+                img.src = IMAGE_PATHS[key];
+                images[key] = img;
+                promises.push(new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = () => {
+                        console.error(`Failed to load image: ${IMAGE_PATHS[key]}`);
+                        reject();
+                    };
+                }));
+            }
+            return Promise.all(promises);
+        }
+
+        /**
+         * Initializes or resets the game state.
+         */
+        function initializeGame() {
+            score = 0;
+            gold = 0;
+            currentLevel = 1;
+            bullets = [];
+            aliens = [];
+            alienBullets = [];
+            coins = [];
+            powerUps = [];
+            companionShips = [];
+            keys = {};
+            alienSpawnInterval = 1500;
+            lastAlienSpawnTime = 0;
+            gameSpeedMultiplier = 1;
+            currentBoss = null;
+            lastBossSpawnTime = 0; // Reset boss timer
+
+            // Reset upgrade levels to current active ship model's base
+            upgradeLevels = {
+                health: 0,
+                firepower: 0,
+                speed: 0,
+                shipModel: upgradeLevels.shipModel // Keep current ship model
+            };
+
+            // Set canvas dimensions based on current CSS computed style
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            player = new Player(); // Create new player instance based on current ship model
+
+            // Clear any active power-up timers
+            clearTimeout(doubleShotTimer);
+            doubleShotActive = false;
+            clearTimeout(companionTimer);
+            companionActive = false;
+            clearTimeout(shieldTimer);
+            shieldActive = false;
+
+            updateUpgradeButtonCosts();
+            checkUpgradeButtonStates();
+            updateShipModelDisplay(); // Ensure ship model display is correct
+            messageBox.textContent = "Welcome, pilot! Destroy aliens, collect gold, and upgrade your ship! Use A/D or Left/Right arrows to move, Spacebar to shoot. On mobile, tap to shoot continuously, swipe to move.";
+            messageBox.classList.add('show');
+            startButton.style.display = 'block';
+            bossMessage.classList.remove('show');
+        }
+
+        /**
+         * Starts the main game loop.
+         */
+        function startGame() {
+            gameActive = true;
+            score = 0;
+            gold = 0;
+            currentLevel = 1;
+            bullets = [];
+            aliens = [];
+            alienBullets = [];
+            coins = [];
+            powerUps = [];
+            companionShips = [];
+            keys = {};
+            alienSpawnInterval = 1500;
+            lastAlienSpawnTime = Date.now();
+            gameSpeedMultiplier = 1;
+            currentBoss = null;
+            lastBossSpawnTime = Date.now(); // Initialize boss timer on game start
+
+            // Reset individual upgrades but keep ship model
+            upgradeLevels.health = 0;
+            upgradeLevels.firepower = 0;
+            upgradeLevels.speed = 0;
+
+            player = new Player(); // Re-initialize player with current ship model's base stats
+
+            // Clear any active power-up timers
+            clearTimeout(doubleShotTimer);
+            doubleShotActive = false;
+            clearTimeout(companionTimer);
+            companionActive = false;
+            clearTimeout(shieldTimer);
+            shieldActive = false;
+
+            applyUpgrades(); // Apply current individual upgrades to the new player instance
+
+            // No need to update UI here, it's drawn directly on canvas
+            updateUpgradeButtonCosts();
+            checkUpgradeButtonStates();
+            messageBox.classList.remove('show');
+            startButton.style.display = 'none';
+            bossMessage.classList.remove('show');
+
+            gameLoop();
+        }
+
+        /**
+         * The main game loop, updates game state and redraws elements.
+         */
+        function gameLoop() {
+            if (!gameActive) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
+            const currentTime = Date.now();
+
+            // --- Player Update ---
+            player.update();
+            player.draw();
+
+            // --- Companion Ship Update ---
+            companionShips.forEach(comp => {
+                comp.update();
+                comp.draw();
+            });
+
+            // --- Bullet Updates ---
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const bullet = bullets[i];
+                bullet.update();
+                bullet.draw();
+                if (bullet.y < 0) {
+                    bullets.splice(i, 1);
+                }
+            }
+
+            // --- Alien Bullet Updates ---
+            for (let i = alienBullets.length - 1; i >= 0; i--) {
+                const alienBullet = alienBullets[i];
+                alienBullet.update();
+                alienBullet.draw();
+
+                // Check collision with player
+                if (checkCollision(player, alienBullet)) {
+                    player.takeDamage(alienBullet.damage);
+                    alienBullets.splice(i, 1);
+                    continue;
+                }
+                if (alienBullet.y > canvas.height) {
+                    alienBullets.splice(i, 1);
+                }
+            }
+
+            // --- Alien Spawning / Boss Management ---
+            if (!currentBoss) {
+                // Boss spawns every 40 seconds if no current boss
+                if (currentTime - lastBossSpawnTime > bossTimerInterval) {
+                    const bossLevel = Math.min(6, Math.floor(currentLevel / 5) + 1); // Boss level based on current game level / 5
+                    currentBoss = new Boss(bossLevel);
+                    bossMessage.classList.add('show');
+                    aliens = []; // Clear all regular aliens
+                    powerUps = [];
+                    alienBullets = [];
+                } else if (currentTime - lastAlienSpawnTime > alienSpawnInterval) {
+                    spawnAlien();
+                    lastAlienSpawnTime = currentTime;
+                    // Gradually increase game speed and decrease spawn interval
+                    gameSpeedMultiplier += 0.0005; // Slower increase for more levels
+                    alienSpawnInterval = Math.max(200, alienSpawnInterval - 3); // Min interval 200ms
+                }
+            } else {
+                bossMessage.classList.add('show'); // Keep showing BOSS text
+                currentBoss.update();
+                currentBoss.draw();
+            }
+
+            // --- Alien Updates ---
+            for (let i = aliens.length - 1; i >= 0; i--) {
+                const alien = aliens[i];
+                alien.update();
+                alien.draw();
+
+                // Check collision with player
+                if (checkCollision(player, alien)) {
+                    player.takeDamage(alien.damage || 10); // Default damage if alien has none
+                    aliens.splice(i, 1);
+                    continue;
+                }
+
+                // Remove aliens that go off-screen (unless sticky)
+                if (!alien.isSticky && alien.y > canvas.height) {
+                    aliens.splice(i, 1);
+                }
+            }
+
+            // --- Coin Updates ---
+            for (let i = coins.length - 1; i >= 0; i--) {
+                const coin = coins[i];
+                coin.update();
+                coin.draw();
+
+                // Check collision with player to collect coin
+                if (checkCollision(player, coin)) {
+                    gold += coin.value;
+                    coins.splice(i, 1);
+                    // No need to update UI here, it's drawn on canvas
+                    checkUpgradeButtonStates();
+                    continue;
+                }
+                if (coin.y > canvas.height) {
+                    coins.splice(i, 1);
+                }
+            }
+
+            // --- Power-up Updates ---
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                const powerUp = powerUps[i];
+                powerUp.update();
+                powerUp.draw();
+
+                // Check collision with player to collect power-up
+                if (checkCollision(player, powerUp)) {
+                    activatePowerUp(powerUp.type);
+                    powerUps.splice(i, 1);
+                    continue;
+                }
+                if (powerUp.y > canvas.height) {
+                    powerUps.splice(i, 1);
+                }
+            }
+
+            // --- Collision Detection (Player Bullets vs Aliens/Boss) ---
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const bullet = bullets[i];
+                let hit = false;
+
+                // Check against boss
+                if (currentBoss && checkCollision(bullet, currentBoss)) {
+                    bullets.splice(i, 1); // Remove bullet
+                    if (currentBoss.takeDamage(bullet.damage)) {
+                        // Boss destroyed!
+                        score += currentBoss.scoreValue;
+                        gold += currentBoss.goldValue;
+                        currentBoss = null; // Remove boss
+                        bossMessage.classList.remove('show');
+                        currentLevel++; // Advance level after boss
+                        lastBossSpawnTime = currentTime; // Reset boss timer after defeating one
+                        messageBox.textContent = `Boss defeated! Level ${currentLevel} unlocked!`;
+                        messageBox.classList.add('show');
+                    }
+                    hit = true;
+                }
+
+                // Check against regular aliens if not hit boss
+                if (!hit) {
+                    for (let j = aliens.length - 1; j >= 0; j--) {
+                        const alien = aliens[j];
+                        if (checkCollision(bullet, alien)) {
+                            bullets.splice(i, 1); // Remove bullet
+                            if (alien.takeDamage(bullet.damage)) {
+                                score += alien.scoreValue;
+                                gold += alien.goldValue;
+                                coins.push(new Coin(alien.x + alien.width / 2 - 20, alien.y + alien.height / 2 - 20, alien.goldValue)); // Coin size adjusted
+                                aliens.splice(j, 1);
+                                // No need to update UI here, it's drawn on canvas
+                                checkUpgradeButtonStates();
+                            }
+                            hit = true;
+                            break; // Bullet hit an alien, no need to check other aliens for this bullet
+                        }
+                    }
+                }
+            }
+
+            // --- Companion Ship Shooting ---
+            companionShips.forEach(comp => {
+                if (Date.now() - comp.lastShotTime > comp.fireRate) {
+                    // Target closest alien
+                    let targetAlien = null;
+                    let minDistance = Infinity;
+                    aliens.forEach(alien => {
+                        const dist = Math.sqrt(Math.pow(comp.x - alien.x, 2) + Math.pow(comp.y - alien.y, 2));
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            targetAlien = alien;
+                        }
+                    });
+                    if (targetAlien) {
+                        bullets.push(new Bullet(comp.x + comp.width / 2 - 10, comp.y, comp.firepower, 'player'));
+                    }
+                    comp.lastShotTime = Date.now();
+                }
+            });
+
+            // Draw Score, Gold, Health, Level on canvas
+            ctx.fillStyle = 'white';
+            ctx.font = '24px Inter'; // Adjust font size as needed
+            ctx.textAlign = 'left';
+            ctx.fillText(`Score: ${score}`, 10, 30);
+            ctx.fillText(`Gold: ${gold} 💰`, 10, 60);
+            ctx.textAlign = 'right';
+            ctx.fillText(`Health: ${player.health} ❤️`, canvas.width - 10, 30);
+            ctx.fillText(`Level: ${currentLevel}`, canvas.width - 10, 60);
+            ctx.textAlign = 'left'; // Reset for other drawings
+
+            requestAnimationFrame(gameLoop); // Continue the loop
+        }
+
+        /**
+         * Spawns a new alien based on current game level.
+         */
+        function spawnAlien() {
+            const alienX = Math.random() * (canvas.width - 70); // Adjusted for larger alien size
+            let alienTypeData;
+            const rand = Math.random();
+
+            // Difficulty scaling for alien types
+            if (currentLevel <= 10) { // Easy
+                alienTypeData = ALIEN_TYPES.easy;
+            } else if (currentLevel <= 20) { // Easy to Moderate
+                alienTypeData = (rand < 0.7) ? ALIEN_TYPES.easy : ALIEN_TYPES.medium;
+            } else if (currentLevel <= 30) { // Moderate
+                alienTypeData = (rand < 0.5) ? ALIEN_TYPES.medium : ALIEN_TYPES.shooter1;
+            } else if (currentLevel <= 40) { // Moderate to Hard
+                if (rand < 0.4) alienTypeData = ALIEN_TYPES.shooter1;
+                else if (rand < 0.8) alienTypeData = ALIEN_TYPES.shooter2;
+                else alienTypeData = ALIEN_TYPES.shooter3;
+            } else { // Hard (Level 41+)
+                if (rand < 0.3) alienTypeData = ALIEN_TYPES.shooter3;
+                else if (rand < 0.6) alienTypeData = ALIEN_TYPES.shooter4;
+                else alienTypeData = ALIEN_TYPES.shooter4; // Using alien6 for shooter4
+            }
+
+            // Special sticky alien (rarely, above level 9)
+            if (currentLevel > 9 && Math.random() < 0.05) { // 5% chance
+                alienTypeData = ALIEN_TYPES.sticky;
+            }
+
+            aliens.push(new Alien(alienX, -70, alienTypeData, currentLevel)); // Adjusted for larger alien size
+
+            // Random chance to drop a power-up
+            if (Math.random() < 0.03) { // 3% chance for any power-up
+                const powerUpTypes = ['doubleShot', 'shield', 'nuke'];
+                if (Math.random() < 0.1) powerUpTypes.push('companion'); // Rarer
+                if (Math.random() < 0.2) powerUpTypes.push('healthBoost'); // More common rare
+                const randomPowerUpType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+                powerUps.push(new PowerUp(alienX + (alienTypeData.width / 2) - 30, -70, randomPowerUpType)); // Position powerup relative to alien
+            }
+        }
+
+        /**
+         * Activates a collected power-up.
+         * @param {string} type The type of power-up to activate.
+         */
+        function activatePowerUp(type) {
+            messageBox.classList.add('show');
+            switch (type) {
+                case 'nuke':
+                    aliens = []; // Wipe out all aliens
+                    alienBullets = []; // Clear alien bullets
+                    messageBox.textContent = "Nuke activated! All enemies cleared!";
+                    break;
+                case 'doubleShot':
+                    clearTimeout(doubleShotTimer);
+                    doubleShotActive = true;
+                    messageBox.textContent = "Double Shot activated! Firepower doubled for 10 seconds!";
+                    doubleShotTimer = setTimeout(() => {
+                        doubleShotActive = false;
+                        messageBox.textContent = "Double Shot expired.";
+                        messageBox.classList.add('show');
+                    }, 10000); // 10 seconds
+                    break;
+                case 'companion':
+                    clearTimeout(companionTimer);
+                    companionActive = true;
+                    companionShips = [
+                        new PlayerCompanion(player.x - 80, player.y + 40, player.firepower), // Adjusted companion position
+                        new PlayerCompanion(player.x + player.width + 20, player.y + 40, player.firepower)
+                    ];
+                    messageBox.textContent = "Companion ships deployed! They'll assist you for 10 seconds!";
+                    companionTimer = setTimeout(() => {
+                        companionActive = false;
+                        companionShips = []; // Remove companions
+                        messageBox.textContent = "Companion ships returned to base.";
+                        messageBox.classList.add('show');
+                    }, 10000); // 10 seconds
+                    break;
+                case 'healthBoost':
+                    player.heal(5);
+                    messageBox.textContent = "Health boosted by 5!";
+                    break;
+                case 'shield':
+                    clearTimeout(shieldTimer);
+                    shieldActive = true;
+                    messageBox.textContent = "Shield activated! Invincible for 10 seconds!";
+                    shieldTimer = setTimeout(() => {
+                        shieldActive = false;
+                        messageBox.textContent = "Shield deactivated.";
+                        messageBox.classList.add('show');
+                    }, 10000); // 10 seconds
+                    break;
+            }
+        }
+
+        /**
+         * Companion ship class for the power-up.
+         */
+        class PlayerCompanion extends Player {
+            constructor(x, y, firepower) {
+                super(); // Call parent constructor to inherit base properties
+                this.x = x;
+                this.y = y;
+                this.width = 50; // Smaller size for companion
+                this.height = 50;
+                this.firepower = firepower * 0.7; // Slightly less powerful than player
+                this.fireRate = 400; // Slightly slower fire rate
+                this.image = images.playerShip1; // Use basic ship image for companion
+            }
+
+            update() {
+                // Companion ships follow player's X position
+                this.x = player.x + (this.x < player.x ? -80 : player.width + 20); // Simple follow logic, adjusted for new player size
+                this.y = player.y + 40; // Stay slightly below player, adjusted
+                // No movement by keys, only automatic shooting
+            }
+        }
+
+
+        /**
+         * Checks for collision between two rectangular objects.
+         * Assumes objects have x, y, width, height properties.
+         * @param {object} obj1
+         * @param {object} obj2
+         * @returns {boolean} True if collision occurs, false otherwise.
+         */
+        function checkCollision(obj1, obj2) {
+            return obj1.x < obj2.x + obj2.width &&
+                   obj1.x + obj1.width > obj2.x &&
+                   obj1.y < obj2.y + obj2.height &&
+                   obj1.y + obj1.height > obj2.y;
+        }
+
+        /**
+         * Handles game over state.
+         */
+        function gameOver() {
+            gameActive = false;
+            // Clear any active power-up timers
+            clearTimeout(doubleShotTimer);
+            doubleShotActive = false;
+            clearTimeout(companionTimer);
+            companionActive = false;
+            clearTimeout(shieldTimer);
+            shieldActive = false;
+            companionShips = [];
+
+            // Prompt for name and save score
+            let playerName = prompt(`Game Over! Your final score: ${score}. You collected ${gold} gold. Enter your name for the leaderboard:`);
+            if (playerName) {
+                saveScore(playerName, score);
+            }
+            displayLeaderboard(); // Show leaderboard after game over
+
+            messageBox.textContent = `Game Over! Your final score: ${score}. You collected ${gold} gold. Click 'Start Game' to try again!`;
+            messageBox.classList.add('show');
+            startButton.style.display = 'block';
+            bossMessage.classList.remove('show');
+        }
+
+        /**
+         * Calculates the cost of an upgrade based on its type and current level.
+         * @param {string} type The type of upgrade (e.g., 'health', 'firepower', 'shipModel').
+         * @returns {number} The calculated cost.
+         */
+        function getUpgradeCost(type) {
+            if (type === 'shipModel') {
+                if (upgradeLevels.shipModel >= SHIP_MODELS.length - 1) return Infinity; // Max level reached
+                return Math.floor(UPGRADE_BASE_COST.shipModel * Math.pow(UPGRADE_COST_MULTIPLIER, upgradeLevels.shipModel));
+            }
+            return Math.floor(UPGRADE_BASE_COST[type] * Math.pow(UPGRADE_COST_MULTIPLIER, upgradeLevels[type]));
+        }
+
+        /**
+         * Updates the cost displayed on upgrade buttons.
+         */
+        function updateUpgradeButtonCosts() {
+            healthCostDisplay.textContent = getUpgradeCost('health');
+            firepowerCostDisplay.textContent = getUpgradeCost('firepower');
+            speedCostDisplay.textContent = getUpgradeCost('speed');
+            shipModelCostDisplay.textContent = getUpgradeCost('shipModel');
+        }
+
+        /**
+         * Checks and updates the enabled/disabled state of upgrade buttons.
+         */
+        function checkUpgradeButtonStates() {
+            upgradeHealthBtn.disabled = gold < getUpgradeCost('health');
+            upgradeFirepowerBtn.disabled = gold < getUpgradeCost('firepower');
+            upgradeSpeedBtn.disabled = gold < getUpgradeCost('speed');
+            upgradeShipModelBtn.disabled = gold < getUpgradeCost('shipModel') || upgradeLevels.shipModel >= SHIP_MODELS.length - 1;
+
+            // Disable prev/next ship buttons if at min/max model index for preview
+            prevShipBtn.disabled = currentShipModelIndex === 0;
+            nextShipBtn.disabled = currentShipModelIndex === SHIP_MODELS.length - 1;
+        }
+
+        /**
+         * Applies all current upgrades to the player.
+         * This function is called at the start of the game and after each upgrade.
+         */
+        function applyUpgrades() {
+            // Apply base stats from current ship model
+            player.baseSpeed = SHIP_MODELS[upgradeLevels.shipModel].baseSpeed;
+            player.baseFirepower = SHIP_MODELS[upgradeLevels.shipModel].baseFirepower;
+            player.baseHealth = SHIP_MODELS[upgradeLevels.shipModel].baseHealth;
+            player.image = images[SHIP_MODELS[upgradeLevels.shipModel].image];
+
+            // Apply individual upgrades
+            player.speed = player.baseSpeed + (upgradeLevels.speed * 1.5);
+            player.firepower = player.baseFirepower + (upgradeLevels.firepower * 5);
+            player.maxHealth = player.baseHealth + (upgradeLevels.health * 25);
+            player.health = Math.min(player.maxHealth, player.health); // Don't exceed new max health
+
+            // Player size is now determined by the ship image, not a separate upgrade
+            player.width = 80 + (upgradeLevels.shipModel * 20); // Scale size more aggressively
+            player.height = 80 + (upgradeLevels.shipModel * 20);
+
+            // No need to call updateUI here, it's done in gameLoop
+        }
+
+        /**
+         * Updates the displayed ship model in the upgrade section.
+         */
+        function updateShipModelDisplay() {
+            const model = SHIP_MODELS[currentShipModelIndex];
+            currentShipImage.src = images[model.image].src;
+            currentShipName.textContent = model.name;
+            shipBaseHealthDisplay.textContent = model.baseHealth;
+            shipBaseFirepowerDisplay.textContent = model.baseFirepower;
+            shipBaseSpeedDisplay.textContent = model.baseSpeed;
+
+            // Update upgrade button cost for the *next* model
+            const nextModelCost = getUpgradeCost('shipModel');
+            shipModelCostDisplay.textContent = nextModelCost;
+
+            // Disable upgrade button if already at this model or higher, or not enough gold
+            upgradeShipModelBtn.disabled = (currentShipModelIndex <= upgradeLevels.shipModel) || (gold < nextModelCost) || (upgradeLevels.shipModel >= SHIP_MODELS.length - 1);
+
+            checkUpgradeButtonStates(); // Recheck all button states
+        }
+
+        // --- Leaderboard Functions ---
+        const LEADERBOARD_KEY = 'galacticGoldRushLeaderboard';
+
+        /**
+         * Saves a score to local storage.
+         * @param {string} name Player's name.
+         * @param {number} score Player's score.
+         */
+        function saveScore(name, score) {
+            let leaderboard = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || '[]');
+            leaderboard.push({ name, score, date: new Date().toISOString() });
+            leaderboard.sort((a, b) => b.score - a.score); // Sort by score descending
+            leaderboard = leaderboard.slice(0, 10); // Keep top 10
+            localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboard));
+        }
+
+        /**
+         * Displays the leaderboard in the modal.
+         */
+        function displayLeaderboard() {
+            leaderboardList.innerHTML = ''; // Clear previous entries
+            let leaderboard = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || '[]');
+
+            if (leaderboard.length === 0) {
+                leaderboardList.innerHTML = '<li class="text-center text-gray-400">No scores yet! Be the first!</li>';
+            } else {
+                leaderboard.forEach((entry, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${index + 1}. ${entry.name}</span>
+                        <span>${entry.score}</span>
+                    `;
+                    leaderboardList.appendChild(li);
+                });
+            }
+            leaderboardModal.style.display = 'flex'; // Show modal
+        }
+
+        // --- Event Listeners ---
+
+        // Keyboard input for player movement and shooting
+        document.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            if (e.code === 'Space') {
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        // Touch input for player movement and continuous shooting
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent scrolling/zooming
+            if (gameActive) {
+                touchActive = true; // Start continuous firing
+                if (e.touches.length > 0) {
+                    touchStartX = e.touches[0].clientX;
+                }
+            }
+        }, { passive: false }); // Use passive: false to allow preventDefault
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault(); // Prevent scrolling/zooming
+            if (gameActive && e.touches.length > 0) {
+                const touchCurrentX = e.touches[0].clientX;
+                const deltaX = touchCurrentX - touchStartX;
+
+                // Adjust player position based on touch movement
+                player.x += deltaX * 1.5; // Adjust sensitivity
+                // Keep player within bounds
+                if (player.x < 0) player.x = 0;
+                if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+                touchStartX = touchCurrentX; // Update start for continuous movement
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', () => {
+            touchActive = false; // Stop continuous firing
+        });
+
+        // Start Game button
+        startButton.addEventListener('click', startGame);
+
+        // Individual Upgrade buttons
+        upgradeHealthBtn.addEventListener('click', () => {
+            const cost = getUpgradeCost('health');
+            if (gold >= cost) {
+                gold -= cost;
+                upgradeLevels.health++;
+                applyUpgrades();
+                updateUpgradeButtonCosts();
+                checkUpgradeButtonStates();
+                // No need to update UI here, it's drawn on canvas
+                messageBox.textContent = `Health upgraded! Current Max Health: ${player.maxHealth}.`;
+                messageBox.classList.add('show');
+            } else {
+                messageBox.textContent = `Not enough gold for Health upgrade! Need ${cost - gold} more.`;
+                messageBox.classList.add('show');
+            }
+        });
+
+        upgradeFirepowerBtn.addEventListener('click', () => {
+            const cost = getUpgradeCost('firepower');
+            if (gold >= cost) {
+                gold -= cost;
+                upgradeLevels.firepower++;
+                applyUpgrades();
+                updateUpgradeButtonCosts();
+                checkUpgradeButtonStates();
+                // No need to update UI here, it's drawn on canvas
+                messageBox.textContent = `Firepower upgraded! Current Damage: ${player.firepower}.`;
+                messageBox.classList.add('show');
+            } else {
+                messageBox.textContent = `Not enough gold for Firepower upgrade! Need ${cost - gold} more.`;
+                messageBox.classList.add('show');
+            }
+        });
+
+        upgradeSpeedBtn.addEventListener('click', () => {
+            const cost = getUpgradeCost('speed');
+            if (gold >= cost) {
+                gold -= cost;
+                upgradeLevels.speed++;
+                applyUpgrades();
+                updateUpgradeButtonCosts();
+                checkUpgradeButtonStates();
+                // No need to update UI here, it's drawn on canvas
+                messageBox.textContent = `Speed upgraded! Current Speed: ${player.speed}.`;
+                messageBox.classList.add('show');
+            } else {
+                messageBox.textContent = `Not enough gold for Speed upgrade! Need ${cost - gold} more.`;
+                messageBox.classList.add('show');
+            }
+        });
+
+        // Ship Model Navigation and Upgrade
+        prevShipBtn.addEventListener('click', () => {
+            if (currentShipModelIndex > 0) {
+                currentShipModelIndex--;
+                updateShipModelDisplay();
+            }
+        });
+
+        nextShipBtn.addEventListener('click', () => {
+            if (currentShipModelIndex < SHIP_MODELS.length - 1) {
+                currentShipModelIndex++;
+                updateShipModelDisplay();
+            }
+        });
+
+        upgradeShipModelBtn.addEventListener('click', () => {
+            const cost = getUpgradeCost('shipModel');
+            if (gold >= cost && currentShipModelIndex > upgradeLevels.shipModel) {
+                gold -= cost;
+                upgradeLevels.shipModel = currentShipModelIndex; // Set to the currently viewed model
+                // Reset individual upgrades when upgrading ship model
+                upgradeLevels.health = 0;
+                upgradeLevels.firepower = 0;
+                upgradeLevels.speed = 0;
+                player = new Player(); // Re-initialize player with new model's base stats
+                applyUpgrades(); // Apply new base stats
+                updateUpgradeButtonCosts();
+                checkUpgradeButtonStates();
+                // No need to update UI here, it's drawn on canvas
+                messageBox.textContent = `Spaceship upgraded to ${SHIP_MODELS[upgradeLevels.shipModel].name}! Individual upgrades reset.`;
+                messageBox.classList.add('show');
+            } else if (currentShipModelIndex <= upgradeLevels.shipModel) {
+                messageBox.textContent = `You already own this ship model or a better one!`;
+                messageBox.classList.add('show');
+            } else {
+                messageBox.textContent = `Not enough gold for ${SHIP_MODELS[currentShipModelIndex].name}! Need ${cost - gold} more.`;
+                messageBox.classList.add('show');
+            }
+        });
+
+        // Shop Buttons
+        redeemCouponBtn.addEventListener('click', () => {
+            const code = couponCodeInput.value.trim().toUpperCase();
+            if (code === "RAAJ") {
+                gold += 500;
+                messageBox.textContent = "Coupon redeemed! You received 500 gold coins!";
+                messageBox.classList.add('show');
+                couponCodeInput.value = ''; // Clear input
+                checkUpgradeButtonStates(); // Update button states
+            } else {
+                messageBox.textContent = "Invalid coupon code. Please try again.";
+                messageBox.classList.add('show');
+            }
+        });
+
+        purchaseCoinsBtn.addEventListener('click', () => {
+            window.open('https://tally.so/r/3x2Bl5', '_blank'); // Open Tally.so link in new tab
+            messageBox.textContent = "Opening purchase page...";
+            messageBox.classList.add('show');
+        });
+
+        // Leaderboard buttons
+        showLeaderboardBtn.addEventListener('click', displayLeaderboard);
+        closeLeaderboardBtn.addEventListener('click', () => {
+            leaderboardModal.style.display = 'none';
+        });
+
+        // Handle window resize for responsive canvas
+        window.addEventListener('resize', () => {
+            // Always resize the canvas to fit its parent
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            // Reposition player to center bottom
+            player.x = canvas.width / 2 - player.width / 2;
+            player.y = canvas.height - player.height - 40;
+            // Ensure boss is also repositioned if active
+            if (currentBoss) {
+                currentBoss.x = canvas.width / 2 - currentBoss.width / 2;
+                currentBoss.y = 50; // Keep boss at fixed Y position
+            }
+        });
+
+        // --- Initial Setup ---
+        window.onload = function() {
+            preloadImages().then(() => {
+                initializeGame();
+                updateShipModelDisplay(); // Initial display of the first ship model
+            }).catch(error => {
+                console.error("Error preloading images:", error);
+                messageBox.textContent = "Error loading game assets. Please try refreshing.";
+                messageBox.classList.add('show');
+            });
+        };
+    </script>
+</body>
+</html>
