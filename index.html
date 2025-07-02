@@ -74,6 +74,10 @@
             gap: 1.5rem;
             position: relative; /* For footer */
             z-index: 1; /* Ensure it's above background */
+            /* Allow scrolling for the main menu content if it overflows on small screens */
+            max-height: 100vh; /* Limit height to viewport */
+            overflow-y: auto; /* Enable vertical scrolling */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
         }
 
         .game-screen {
@@ -580,7 +584,7 @@
         const nextShipBtn = document.getElementById('nextShipBtn');
 
         const redeemCodeInput = document.getElementById('redeemCodeInput');
-        const redeemCodeBtn = document.getElementById('redeemCodeBtn'); // Fixed typo here: 'redeeemCodeBtn' to 'redeemCodeBtn'
+        const redeemCodeBtn = document.getElementById('redeemCodeBtn'); // Corrected ID here
 
         // Item related DOM elements
         const buyCloneBtn = document.getElementById('buyCloneBtn');
@@ -924,7 +928,7 @@
                 this.health -= damage;
                 if (this.health <= 0) {
                     this.health = 0;
-                    gameOver();
+                    gameOver(); // Call the global gameOver function
                 }
                 updateUI();
                 inGameMessages.push(new InGameMessage(player.x + player.width / 2, player.y, `-${damage} HP!`, 'red'));
@@ -1059,17 +1063,18 @@
                 const height = 35 + (level * 2); // Scale height with level
                 super(x, y, width, height, imageSrc);
 
-                this.baseSpeed = 1 + (level * 0.2); // Speed increases with level
+                // Difficulty scaling based on wave level (non-linear)
+                this.baseSpeed = 1 + (level * 0.2) * Math.pow(1.05, level); // Speed increases with level, with a curve
                 this.speed = this.baseSpeed * gameSpeedMultiplier;
-                this.baseHealth = 20 + (level * 5); // Health increases with level
+                this.baseHealth = 20 * Math.pow(1.1, level); // Health increases with level, with a curve
                 this.health = this.baseHealth;
                 this.goldValue = 10 + (level * 2); // Gold value increases with level
                 this.scoreValue = 100 + (level * 20); // Score value increases with level
                 this.targetY = 50 + Math.random() * (canvas.height / 3); // Stop at random Y in top third
                 this.isStopped = false;
                 this.lastShotTime = Date.now();
-                this.shootInterval = 1500 + Math.random() * 1000; // Aliens shoot every 1.5-2.5 seconds
-                this.attackDamage = 1; // Alien reduces health by one
+                this.shootInterval = Math.max(300, 1500 - (level * 75)); // Aliens shoot faster with level, min 300ms
+                this.attackDamage = 1 + Math.floor(level / 3); // Alien reduces health by 1 + (level/3)
             }
 
             /**
@@ -1130,14 +1135,15 @@
                 const height = 100 + (level * 10); // Scale height with level
                 super(x, y, width, height, imageSrc);
 
-                this.baseHealth = 500 + (level * 100);
+                // Difficulty scaling for boss (more aggressive curve)
+                this.baseHealth = 500 * Math.pow(1.3, level); // Health increases significantly
                 this.health = this.baseHealth;
                 this.maxHealth = this.baseHealth;
                 this.speed = 1; // Boss moves slower
                 this.goldValue = 500 + (level * 100);
                 this.scoreValue = 1000 + (level * 200);
-                this.attackDamage = 1; // Boss reduces health by one per hit
-                this.attackInterval = 1000; // Boss attacks every 1 second
+                this.attackDamage = 5 + Math.floor(level * 2); // Boss reduces health significantly
+                this.attackInterval = Math.max(400, 1000 - (level * 150)); // Boss attacks much faster
                 this.lastAttackTime = Date.now();
                 this.direction = 1; // 1 for right, -1 for left
                 this.targetY = 50; // Boss stops at a fixed Y
@@ -1161,7 +1167,7 @@
                 // Boss attack (periodically damage player)
                 if (Date.now() - this.lastAttackTime > this.attackInterval) {
                     player.takeDamage(this.attackDamage);
-                    inGameMessages.push(new InGameMessage(player.x + player.width / 2, player.y, "-1 HP (Boss)", 'red'));
+                    inGameMessages.push(new InGameMessage(player.x + player.width / 2, player.y, `-${this.attackDamage} HP (Boss)`, 'red'));
                     this.lastAttackTime = Date.now();
                 }
             }
@@ -1218,7 +1224,7 @@
                 this.type = type; // 'health', 'rapid_fire', 'invincibility'
                 this.emoji = '';
                 if (this.type === 'health') this.emoji = '❤️';
-                else if (this.type === 'rapid_fire') this.emoji = '�';
+                else if (this.type === 'rapid_fire') this.emoji = '🔥';
                 else if (this.type === 'invincibility') this.emoji = '🛡️';
             }
 
@@ -1291,7 +1297,6 @@
             powerups = [];
             boss = null;
             playerClones = [];
-            bossActive = false;
             keys = {};
             inGameMessages = [];
             currentWave = 0;
@@ -1334,6 +1339,36 @@
         }
 
         /**
+         * Function to handle game over.
+         */
+        function gameOver() {
+            gameActive = false;
+            showMessage(`Game Over! Your Score: ${score}`, 'danger');
+
+            // Clear all game entities
+            bullets = [];
+            alienBullets = [];
+            aliens = [];
+            coins = [];
+            powerups = [];
+            boss = null;
+            playerClones = [];
+            inGameMessages = [];
+
+            // Clear any active effects and timers
+            activeEffects = { shield: false, timeWarp: false, clone: false };
+            for (const key in effectTimers) {
+                clearTimeout(effectTimers[key]);
+                effectTimers[key] = null;
+            }
+
+            // Return to main menu after a short delay
+            setTimeout(() => {
+                initializeGame(); // Reset game state for a new game
+            }, 3000); // 3 seconds before returning to menu
+        }
+
+        /**
          * Starts the main game loop.
          */
         function startGame() {
@@ -1347,7 +1382,6 @@
             powerups = [];
             boss = null;
             playerClones = [];
-            bossActive = false;
             keys = {};
             inGameMessages = [];
             currentWave = 1; // Start with wave 1
@@ -1454,32 +1488,29 @@
             }
 
             // --- Wave Management & Alien Spawning ---
-            if (!boss) { // Only spawn regular aliens if no boss is active
-                if (aliensDestroyedInWave >= ALIENS_PER_WAVE && aliens.length === 0 && aliensSpawnedInWave >= ALIENS_PER_WAVE) {
-                    // All aliens from previous wave destroyed, start new wave
-                    currentWave++;
-                    aliensSpawnedInWave = 0;
-                    aliensDestroyedInWave = 0;
-                    inGameMessages.push(new InGameMessage(canvas.width / 2, canvas.height / 2, `Wave ${currentWave} Incoming!`, 'lightblue', 2500));
-                }
+            // Check if a new wave should start (all aliens from previous wave destroyed or no boss)
+            if (!boss && aliensDestroyedInWave >= ALIENS_PER_WAVE && aliens.length === 0 && aliensSpawnedInWave >= ALIENS_PER_WAVE) {
+                currentWave++;
+                aliensSpawnedInWave = 0;
+                aliensDestroyedInWave = 0;
+                inGameMessages.push(new InGameMessage(canvas.width / 2, canvas.height / 2, `Wave ${currentWave} Incoming!`, 'lightblue', 2500));
+            }
 
-                if (currentWave % BOSS_WAVE_INTERVAL === 0 && currentWave > 0 && !boss) {
-                    // Spawn boss on boss wave
-                    if (aliens.length === 0 && aliensSpawnedInWave === 0) { // Ensure no regular aliens before boss
-                        boss = new Boss(canvas.width / 2 - 50, -100, Math.floor(currentWave / BOSS_WAVE_INTERVAL));
-                        inGameMessages.push(new InGameMessage(canvas.width / 2, canvas.height / 2, "BOSS APPROACHES!", 'orange', 3000));
-                    }
-                } else if (aliensSpawnedInWave < ALIENS_PER_WAVE && currentTime - lastAlienSpawnTime > alienSpawnInterval) {
-                    // Spawn regular aliens for current wave
-                    const alienX = Math.random() * (canvas.width - 40);
-                    aliens.push(new Alien(alienX, -40, currentWave)); // Alien level based on current wave
-                    lastAlienSpawnTime = currentTime;
-                    aliensSpawnedInWave++;
+            // Spawn boss on boss wave, if not already active and current wave is a boss wave and no regular aliens left
+            if (currentWave % BOSS_WAVE_INTERVAL === 0 && currentWave > 0 && !boss && aliens.length === 0 && aliensSpawnedInWave === 0) {
+                boss = new Boss(canvas.width / 2 - 50, -100, Math.floor(currentWave / BOSS_WAVE_INTERVAL));
+                inGameMessages.push(new InGameMessage(canvas.width / 2, canvas.height / 2, "BOSS APPROACHES!", 'orange', 3000));
+            } else if (!boss && aliensSpawnedInWave < ALIENS_PER_WAVE && currentTime - lastAlienSpawnTime > alienSpawnInterval) {
+                // Spawn regular aliens for current wave, only if no boss is active
+                const alienX = Math.random() * (canvas.width - 40);
+                aliens.push(new Alien(alienX, -40, currentWave)); // Alien level based on current wave
+                lastAlienSpawnTime = currentTime;
+                aliensSpawnedInWave++;
 
-                    // Gradually increase game speed and decrease spawn interval
-                    gameSpeedMultiplier += 0.0005; // Slower increase
-                    alienSpawnInterval = Math.max(300, alienSpawnInterval - 2); // Min interval 300ms
-                }
+                // Gradually increase game speed and decrease spawn interval
+                // More aggressive scaling for game speed multiplier
+                gameSpeedMultiplier += 0.002;
+                alienSpawnInterval = Math.max(200, alienSpawnInterval - 5); // Min interval 200ms
             }
 
 
@@ -1569,10 +1600,10 @@
                         gold += boss.goldValue;
                         coins.push(new Coin(boss.x + boss.width / 2 - 12.5, boss.y + boss.height / 2 - 12.5, boss.goldValue));
                         boss = null; // Boss destroyed
+                        // After boss, immediately set flags to trigger next wave
+                        aliensDestroyedInWave = ALIENS_PER_WAVE;
+                        aliensSpawnedInWave = ALIENS_PER_WAVE;
                         inGameMessages.push(new InGameMessage(canvas.width / 2, canvas.height / 2, "BOSS DEFEATED!", 'gold', 3000));
-                        // After boss, reset wave counter for next boss to appear in 5 waves
-                        currentWave = Math.floor(currentWave / BOSS_WAVE_INTERVAL) * BOSS_WAVE_INTERVAL; // Align to nearest boss wave start
-                        aliensDestroyedInWave = ALIENS_PER_WAVE; // Force next wave to be new regular wave
                     }
                     bulletHit = true;
                 }
@@ -1695,10 +1726,10 @@
             fireRateLevelDisplay.textContent = `(${upgradeLevels.fireRate}/${MAX_INDIVIDUAL_UPGRADE_LEVEL})`;
 
             // Ship tier upgrade cost
-            const nextShipTier = currentShipTier + 1; // Correctly define nextShipTier
-            if (nextShipTier < SHIP_TIERS.length) { // Use nextShipTier here
-                shipTierCostDisplay.textContent = SHIP_TIERS[nextShipTier].cost; // Use nextShipTier here
-                upgradeShipTierBtn.disabled = gold < SHIP_TIERS[nextShipTier].cost; // Use nextShipTier here
+            const nextShipTier = currentShipTier + 1;
+            if (nextShipTier < SHIP_TIERS.length) {
+                shipTierCostDisplay.textContent = SHIP_TIERS[nextShipTier].cost;
+                upgradeShipTierBtn.disabled = gold < SHIP_TIERS[nextShipTier].cost;
             } else {
                 shipTierCostDisplay.textContent = 'MAX';
                 upgradeShipTierBtn.disabled = true;
@@ -1967,12 +1998,12 @@
         });
 
         upgradeShipTierBtn.addEventListener('click', () => {
-            const nextTier = currentShipTier + 1;
-            if (nextTier < SHIP_TIERS.length) {
-                const cost = SHIP_TIERS[nextTier].cost;
+            const nextShipTier = currentShipTier + 1;
+            if (nextShipTier < SHIP_TIERS.length) {
+                const cost = SHIP_TIERS[nextShipTier].cost;
                 if (gold >= cost) {
                     gold -= cost;
-                    currentShipTier = nextTier;
+                    currentShipTier = nextShipTier;
                     // Reset individual upgrades when upgrading ship tier
                     upgradeLevels = { health: 0, firepower: 0, speed: 0, size: 0, fireRate: 0 };
                     applyUpgrades();
@@ -1983,7 +2014,7 @@
                     updateShipDisplay();
                     showMessage(`Upgraded to ${SHIP_TIERS[currentShipTier].name}! All individual upgrades reset.`, 'success');
                 } else {
-                    showMessage(`Not enough gold to upgrade to ${SHIP_TIERS[nextTier].name}! Need ${cost - gold} more.`, 'warning');
+                    showMessage(`Not enough gold to upgrade to ${SHIP_TIERS[nextShipTier].name}! Need ${cost - gold} more.`, 'warning');
                 }
             } else {
                 showMessage("You have the best ship available!", 'info');
