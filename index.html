@@ -903,7 +903,7 @@
                 switch (type) {
                     case 'nuke': return '💥';
                     case 'doubleShot': return '⚡';
-                    case 'companion': return '🤖';
+                    case 'companion': return '�';
                     case 'healthBoost': return '➕';
                     case 'shield': return '🛡️';
                     default: return '❓';
@@ -953,7 +953,7 @@
                 // Companion ships follow player's X position
                 // Keep companions relative to player, adjusted for new player size
                 this.x = player.x + (this.x < player.x ? -100 : player.width + 20);
-                this.y = player.y + 40; // Stay slightly below player
+                this.y = player.y + 50; // Stay slightly below player (adjusted from 40)
             }
         }
 
@@ -1035,6 +1035,7 @@
          * Starts the main game loop.
          */
         function startGame() {
+            console.log("Starting game...");
             gameActive = true;
             score = 0;
             gold = 0;
@@ -1057,7 +1058,20 @@
             upgradeLevels.firepower = 0;
             upgradeLevels.speed = 0;
 
+            // Switch to game screen first to ensure canvas has proper dimensions
+            mainMenuWrapper.style.display = 'none';
+            gameScreenWrapper.style.display = 'flex';
+
+            // Now set canvas dimensions based on its visible parent
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            console.log(`Canvas dimensions: ${canvas.width}x${canvas.height}`);
+
+
             player = new Player(); // Re-initialize player with current ship model's base stats
+            applyUpgrades(); // Apply current individual upgrades to the new player instance
+            console.log(`Player initialized: x=${player.x}, y=${player.y}, width=${player.width}, height=${player.height}, health=${player.health}`);
+
 
             // Clear any active power-up timers
             clearTimeout(doubleShotTimer);
@@ -1067,17 +1081,11 @@
             clearTimeout(shieldTimer);
             shieldActive = false;
 
-            applyUpgrades(); // Apply current individual upgrades to the new player instance
-
             updateUpgradeButtonCosts();
             checkUpgradeButtonStates();
             messageBox.classList.remove('show');
             // startButton.style.display = 'none'; // Handled by main menu visibility
             bossMessage.classList.remove('show');
-
-            // Switch to game screen
-            mainMenuWrapper.style.display = 'none';
-            gameScreenWrapper.style.display = 'flex';
 
             gameLoop();
         }
@@ -1086,7 +1094,10 @@
          * The main game loop, updates game state and redraws elements.
          */
         function gameLoop() {
-            if (!gameActive) return;
+            if (!gameActive) {
+                console.log("Game loop stopped.");
+                return;
+            }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
 
