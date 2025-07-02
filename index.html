@@ -18,104 +18,95 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 0; /* Remove body padding to allow full screen canvas */
+            padding: 0; /* Remove padding from body to allow full screen game */
             box-sizing: border-box;
             color: #e2e8f0; /* Light text color */
-            overflow: hidden; /* Prevent scrollbars due to preloader/full screen */
+            overflow: hidden; /* Prevent body scroll */
+            background-image: url('https://i.ibb.co/CpNDPHHG/Gemini-Generated-Image-rqajpfrqajpfrqaj.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
 
-        /* Preloader styles */
-        #preloader {
+        .preloader {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('https://i.ibb.co/CpNDPHHG/Gemini-Generated-Image-rqajpfrqajpfrqaj.png'); /* Preloader background */
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background-color: #1a202c;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            color: white;
-            font-size: 3rem;
+            color: #e2e8f0;
+            font-size: 2.5rem;
             font-weight: 800;
             z-index: 1000;
-            opacity: 1;
             transition: opacity 1s ease-out;
+            background-image: url('https://i.ibb.co/CpNDPHHG/Gemini-Generated-Image-rqajpfrqajpfrqaj.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
 
-        #preloader.hidden {
+        .preloader-hidden {
             opacity: 0;
-            pointer-events: none; /* Disable interactions once hidden */
-        }
-
-        .preloader-text {
-            animation: pulse 1.5s infinite alternate;
-            text-shadow: 0 0 10px rgba(74, 144, 226, 0.7);
+            pointer-events: none;
         }
 
         .preloader-watermark {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.5);
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            font-size: 0.8rem;
+            margin-top: 10px;
+            color: #a0aec0;
         }
 
-        @keyframes pulse {
-            from {
-                transform: scale(1);
-            }
-            to {
-                transform: scale(1.05);
-            }
-        }
-
-        /* Main game wrapper */
         .game-wrapper {
-            background-color: #2d3748; /* Darker gray for container */
+            background-color: rgba(45, 55, 72, 0.9); /* Darker gray with transparency */
             border-radius: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
             padding: 2rem;
             text-align: center;
-            max-width: 900px; /* Wider for game + upgrades */
+            max-width: 1000px; /* Wider for game + upgrades */
             width: 100%;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
-            position: relative; /* For watermark positioning */
-            background-image: url('https://i.ibb.co/CpNDPHHG/Gemini-Generated-Image-rqajpfrqajpfrqaj.png'); /* Main game background */
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0; /* Hidden initially, shown after preloader */
-            transition: opacity 1s ease-in;
-            box-sizing: border-box; /* Include padding in width/height */
-            overflow-y: auto; /* Allow scrolling for content that overflows vertically */
-            max-height: 100vh; /* Limit height to viewport height */
+            position: relative; /* For footer */
+            z-index: 1; /* Ensure it's above background */
         }
 
-        .game-wrapper.show {
-            opacity: 1;
+        .game-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
         }
 
-        .game-wrapper.hide {
+        .game-screen.hidden {
+            transform: translateY(100vh);
             opacity: 0;
-            pointer-events: none; /* Disable interactions while fading out */
+            pointer-events: none;
+            position: absolute; /* Take it out of flow when hidden */
         }
 
-        .main-watermark {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.3);
-            z-index: 10; /* Ensure it's above other elements */
+        .game-active-full-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #1a202c; /* Dark background for space theme */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+            z-index: 50; /* Above main menu, below preloader */
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
         }
 
         canvas {
@@ -125,20 +116,9 @@
             display: block;
             margin: 0 auto;
             touch-action: none; /* Disable default touch actions like scrolling/zooming */
-            opacity: 0; /* Start hidden for smooth fade-in */
-            transition: opacity 0.5s ease-in, width 0.5s ease-in-out, height 0.5s ease-in-out, border-radius 0.5s ease-in-out;
-        }
-
-        /* Full-screen canvas for gameplay */
-        canvas.fullscreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw !important; /* Override width */
-            height: 100vh !important; /* Override height */
-            border-radius: 0;
-            z-index: 999; /* Below preloader, above everything else */
-            opacity: 1; /* Fully visible when fullscreen */
+            width: 100%; /* Make canvas responsive */
+            max-width: 600px; /* Max width for desktop */
+            height: auto; /* Maintain aspect ratio */
         }
 
         .game-stats {
@@ -154,7 +134,7 @@
         }
 
         .upgrade-section {
-            background-color: rgba(44, 62, 80, 0.8); /* Slightly different dark shade with transparency */
+            background-color: rgba(44, 62, 80, 0.9); /* Slightly different dark shade with transparency */
             border-radius: 1rem;
             padding: 1.5rem;
             margin-top: 1rem;
@@ -163,14 +143,14 @@
             gap: 1rem;
         }
 
-        .upgrade-buttons, .ship-selection-nav {
+        .upgrade-buttons {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
             gap: 1rem;
         }
 
-        .upgrade-button, .buy-ship-button, .buy-coins-button, .redeem-button, .nav-button {
+        .upgrade-button {
             background-color: #4a90e2; /* Blue for upgrades */
             color: white;
             font-weight: 700;
@@ -181,18 +161,16 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 0.5rem;
-            text-align: center;
         }
 
-        .upgrade-button:hover:not(:disabled), .buy-ship-button:hover:not(:disabled), .buy-coins-button:hover:not(:disabled), .redeem-button:hover:not(:disabled), .nav-button:hover:not(:disabled) {
+        .upgrade-button:hover:not(:disabled) {
             background-color: #357ABD;
             transform: translateY(-3px);
             box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
         }
 
-        .upgrade-button:disabled, .buy-ship-button:disabled, .redeem-button:disabled, .nav-button:disabled {
+        .upgrade-button:disabled {
             background-color: #4a5568; /* Gray out when disabled */
             cursor: not-allowed;
             opacity: 0.7;
@@ -224,10 +202,88 @@
             margin-top: 1.5rem;
             font-weight: 600;
             display: none;
+            word-wrap: break-word; /* Ensure text wraps */
         }
 
         .message-box.show {
             display: block;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            text-align: center;
+            color: #a0aec0;
+            font-size: 0.9rem;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            padding: 1rem 0;
+        }
+
+        .footer img {
+            height: 30px; /* Adjust as needed */
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+
+        /* Ship selection and stats display */
+        .ship-selection {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .ship-image-container {
+            width: 100px; /* Fixed width for ship image */
+            height: 100px; /* Fixed height for ship image */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .ship-image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .ship-stats-display {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: left;
+            flex-grow: 1;
+            max-width: 300px;
+        }
+
+        .ship-stats-display p {
+            margin-bottom: 0.5rem;
+        }
+
+        .ship-nav-button {
+            background-color: #63b3ed;
+            color: white;
+            font-weight: 700;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .ship-nav-button:hover:not(:disabled) {
+            background-color: #4299e1;
+        }
+
+        .ship-nav-button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
 
         .redeem-section {
@@ -235,9 +291,7 @@
             flex-direction: column;
             gap: 0.75rem;
             margin-top: 1rem;
-            padding: 1rem;
-            background-color: rgba(59, 78, 97, 0.8);
-            border-radius: 0.75rem;
+            align-items: center;
         }
 
         .redeem-input {
@@ -246,64 +300,44 @@
             border: 1px solid #4a5568;
             background-color: #2d3748;
             color: #e2e8f0;
-            width: 100%;
-            box-sizing: border-box;
+            width: 80%;
+            max-width: 250px;
         }
 
-        .footer {
-            margin-top: 2rem;
-            text-align: center;
-            opacity: 0; /* Hidden initially, shown after preloader */
-            transition: opacity 1s ease-in;
-            padding-bottom: 20px; /* Add some padding for the footer */
+        .redeem-button {
+            background-color: #ed8936; /* Orange for redeem */
+            color: white;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
         }
 
-        .footer.show {
-            opacity: 1;
+        .redeem-button:hover {
+            background-color: #dd6b20;
+            transform: translateY(-2px);
         }
 
-        .footer.hide {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .footer img {
-            max-width: 100px;
-            height: auto;
-            border-radius: 0.5rem;
-        }
-
-        .ship-display-area {
-            display: flex;
-            flex-direction: column;
+        .buy-coins-button {
+            background-color: #ecc94b; /* Yellow for buy coins */
+            color: #2d3748;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            text-decoration: none; /* For anchor tag */
+            display: inline-flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            justify-content: center;
         }
 
-        .ship-display-area img {
-            max-width: 150px;
-            height: auto;
-            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        }
-
-        .ship-stats-table {
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
-            text-align: left;
-            border-collapse: collapse;
-            color: #cbd5e0;
-        }
-
-        .ship-stats-table th, .ship-stats-table td {
-            padding: 0.5rem;
-            border-bottom: 1px solid #4a5568;
-        }
-
-        .ship-stats-table th {
-            font-weight: 600;
-            color: #a0aec0;
+        .buy-coins-button:hover {
+            background-color: #d69e2e;
+            transform: translateY(-2px);
         }
 
         /* Responsive adjustments */
@@ -319,12 +353,22 @@
             .upgrade-section {
                 padding: 1rem;
             }
-            .upgrade-button, .buy-ship-button, .buy-coins-button, .redeem-button, .nav-button {
+            .upgrade-button {
                 padding: 0.6rem 1rem;
                 font-size: 0.9rem;
             }
             h1 {
                 font-size: 2rem;
+            }
+            .ship-selection {
+                flex-direction: column;
+            }
+            .ship-stats-display {
+                width: 100%;
+                max-width: none;
+            }
+            .redeem-input {
+                width: 90%;
             }
         }
 
@@ -339,15 +383,15 @@
                 font-size: 1rem;
                 flex-direction: column;
             }
-            .upgrade-buttons, .ship-selection-nav {
+            .upgrade-buttons {
                 flex-direction: column;
                 align-items: stretch;
             }
-            .upgrade-button, .buy-ship-button, .buy-coins-button, .redeem-button, .nav-button {
+            .upgrade-button {
                 width: 100%;
             }
-            .preloader-text {
-                font-size: 2rem;
+            .preloader {
+                font-size: 1.8rem;
             }
             .preloader-watermark {
                 font-size: 0.7rem;
@@ -355,125 +399,135 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 flex items-center justify-center min-h-screen p-4">
-
+<body class="bg-gray-900 flex items-center justify-center min-h-screen">
     <!-- Preloader -->
-    <div id="preloader">
-        <div class="preloader-text">Cosmo Attack</div>
-        <div class="preloader-watermark">Powered by <a href="https://zenora-ai.vercel.app/" target="_blank" class="text-blue-300 hover:underline">zenora-ai.vercel.app</a></div>
+    <div id="preloader" class="preloader">
+        COSMO ATTACK
+        <div class="preloader-watermark">Powered by <a href="https://zenora-ai.vercel.app/" target="_blank" class="text-blue-400 hover:underline">Zenora AI</a></div>
+        <div class="mt-4 text-sm">Loading assets...</div>
     </div>
 
-    <div class="game-wrapper" id="gameWrapper">
+    <!-- Main Game Wrapper -->
+    <div id="gameWrapper" class="game-wrapper">
         <h1 class="text-4xl font-extrabold text-white mb-4">Galactic Gold Rush!</h1>
 
         <div class="game-stats">
             <span>Score: <span id="scoreDisplay">0</span></span>
             <span>Gold: <span id="goldDisplay">0</span> 💰</span>
-            <span>Health: <span id="healthDisplay">100</span> ❤️</span>
-            <span>Ship: <span id="shipLevelDisplay">Level 1</span></span>
+            <span>Health: <span id="healthDisplay">2000</span> ❤️</span>
         </div>
 
-        <canvas id="gameCanvas" width="600" height="400"></canvas>
-
-        <button id="startButton" class="start-button">Start Game</button>
-
-        <div id="messageBox" class="message-box">
-            Welcome, pilot! Destroy aliens, collect gold, and upgrade your ship! Use A/D or Left/Right arrows to move, Spacebar to shoot.
+        <!-- Game Canvas and Controls -->
+        <div id="gameScreen" class="game-screen">
+            <canvas id="gameCanvas" width="600" height="400"></canvas>
+            <button id="startButton" class="start-button">Start Game</button>
+            <div id="messageBox" class="message-box">
+                Welcome, pilot! Destroy aliens, collect gold, and upgrade your ship! Use A/D or Left/Right arrows to move, Spacebar to shoot.
+            </div>
         </div>
 
+        <!-- Upgrade Section -->
         <div class="upgrade-section">
-            <h2 class="text-2xl font-bold text-white mb-3">Ship Selection & Upgrades</h2>
+            <h2 class="text-2xl font-bold text-white mb-3">Ship Upgrades</h2>
 
-            <div class="ship-display-area">
-                <img id="selectedShipImage" src="" alt="Selected Spaceship">
-                <h3 class="text-xl font-semibold text-white" id="selectedShipName"></h3>
-                <table class="ship-stats-table">
-                    <tr><th>Health</th><td id="displayHealth"></td></tr>
-                    <tr><th>Firepower</th><td id="displayFirepower"></td></tr>
-                    <tr><th>Speed</th><td id="displaySpeed"></td></tr>
-                    <tr><th>Fire Rate</th><td id="displayFireRate"></td></tr>
-                </table>
+            <!-- Ship Selection and Stats -->
+            <div class="ship-selection">
+                <button id="prevShipBtn" class="ship-nav-button">←</button>
+                <div class="flex flex-col items-center gap-2">
+                    <div class="ship-image-container">
+                        <img id="currentShipImage" src="" alt="Current Ship">
+                    </div>
+                    <span id="currentShipName" class="text-xl font-bold text-white"></span>
+                </div>
+                <div class="ship-stats-display">
+                    <p>Health: <span id="shipBaseHealth"></span></p>
+                    <p>Firepower: <span id="shipBaseFirepower"></span></p>
+                    <p>Speed: <span id="shipBaseSpeed"></span></p>
+                    <p>Size: <span id="shipBaseSize"></span></p>
+                </div>
+                <button id="nextShipBtn" class="ship-nav-button">→</button>
             </div>
+            <button id="upgradeShipTierBtn" class="upgrade-button mb-4">
+                Upgrade to Next Ship (<span id="shipTierCost"></span> 💰)
+            </button>
 
-            <div class="ship-selection-nav">
-                <button id="prevShipBtn" class="nav-button">◀️ Previous Ship</button>
-                <button id="nextShipBtn" class="nav-button">Next Ship ▶️</button>
-            </div>
-
+            <h3 class="text-xl font-bold text-white mb-2">Individual Ship Enhancements (Max 3 per stat)</h3>
             <div class="upgrade-buttons">
                 <button id="upgradeHealthBtn" class="upgrade-button">
-                    Upgrade Health (<span id="healthCost">50</span> 💰)
+                    Health <span id="healthLevel">(0/3)</span> (<span id="healthCost">50</span> 💰)
                 </button>
                 <button id="upgradeFirepowerBtn" class="upgrade-button">
-                    Upgrade Firepower (<span id="firepowerCost">75</span> 💰)
+                    Firepower <span id="firepowerLevel">(0/3)</span> (<span id="firepowerCost">75</span> 💰)
                 </button>
                 <button id="upgradeSpeedBtn" class="upgrade-button">
-                    Upgrade Speed (<span id="speedCost">60</span> 💰)
+                    Speed <span id="speedLevel">(0/3)</span> (<span id="speedCost">60</span> 💰)
                 </button>
-                <button id="buyNewShipBtn" class="buy-ship-button">
-                    Buy This Ship (<span id="newShipCost">1000</span> 💰)
+                <button id="upgradeSizeBtn" class="upgrade-button">
+                    Size <span id="sizeLevel">(0/3)</span> (<span id="sizeCost">100</span> 💰)
                 </button>
-            </div>
-            <div class="text-sm text-gray-400 mt-2" id="upgradeInfo">
-                Current Ship: <span id="currentShipName">Basic Fighter</span> | Health: <span id="currentHealthStat">100</span> | Firepower: <span id="currentFirepowerStat">10</span> | Speed: <span id="currentSpeedStat">5</span>
+                <button id="upgradeFireRateBtn" class="upgrade-button">
+                    Fire Rate <span id="fireRateLevel">(0/3)</span> (<span id="fireRateCost">90</span> 💰)
+                </button>
             </div>
         </div>
 
-        <div class="upgrade-section">
-            <h2 class="text-2xl font-bold text-white mb-3">Gold Options</h2>
-            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
-                <a href="https://tally.so/r/3x7Bl5" target="_blank" class="buy-coins-button w-full md:w-auto">
-                    Buy Coins Online 🛒
-                </a>
-                <div class="redeem-section w-full md:w-auto">
-                    <input type="text" id="redeemCodeInput" placeholder="Enter Redeem Code" class="redeem-input">
-                    <button id="redeemCodeBtn" class="redeem-button">Redeem Code</button>
-                </div>
+        <!-- Buy Coins and Redeem Code Section -->
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mt-4">
+            <a href="https://tally.so/r/3x7Bl5" target="_blank" class="buy-coins-button">
+                Buy Coins Online
+            </a>
+            <div class="redeem-section">
+                <input type="text" id="redeemCodeInput" class="redeem-input" placeholder="Enter Redeem Code">
+                <button id="redeemCodeBtn" class="redeem-button">Redeem Code</button>
             </div>
         </div>
 
-        <div class="main-watermark">Powered by <a href="https://zenora-ai.vercel.app/" target="_blank" class="text-blue-300 hover:underline">zenora-ai.vercel.app</a></div>
+        <!-- Footer -->
+        <footer class="footer">
+            Galactic Gold Rush! &copy; 2024
+            <img src="https://i.ibb.co/JRsMXc4G/Gemini-Generated-Image-gyfxkzgyfxkzgyfx.png" alt="Website Logo">
+        </footer>
     </div>
-
-    <footer class="footer" id="gameFooter">
-        <img src="https://i.ibb.co/JRsMXc4G/Gemini-Generated-Image-gyfxkzgyfxkzgyfx.png" alt="Website Logo">
-    </footer>
 
     <script>
         // --- DOM Elements ---
         const preloader = document.getElementById('preloader');
         const gameWrapper = document.getElementById('gameWrapper');
-        const gameFooter = document.getElementById('gameFooter');
+        const gameScreen = document.getElementById('gameScreen');
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreDisplay = document.getElementById('scoreDisplay');
         const goldDisplay = document.getElementById('goldDisplay');
         const healthDisplay = document.getElementById('healthDisplay');
-        const shipLevelDisplay = document.getElementById('shipLevelDisplay');
         const startButton = document.getElementById('startButton');
         const messageBox = document.getElementById('messageBox');
 
         const upgradeHealthBtn = document.getElementById('upgradeHealthBtn');
         const upgradeFirepowerBtn = document.getElementById('upgradeFirepowerBtn');
         const upgradeSpeedBtn = document.getElementById('upgradeSpeedBtn');
-        const buyNewShipBtn = document.getElementById('buyNewShipBtn');
+        const upgradeSizeBtn = document.getElementById('upgradeSizeBtn');
+        const upgradeFireRateBtn = document.getElementById('upgradeFireRateBtn');
+        const upgradeShipTierBtn = document.getElementById('upgradeShipTierBtn');
 
         const healthCostDisplay = document.getElementById('healthCost');
         const firepowerCostDisplay = document.getElementById('firepowerCost');
         const speedCostDisplay = document.getElementById('speedCost');
-        const newShipCostDisplay = document.getElementById('newShipCost');
+        const sizeCostDisplay = document.getElementById('sizeCost');
+        const fireRateCostDisplay = document.getElementById('fireRateCost');
+        const shipTierCostDisplay = document.getElementById('shipTierCost');
 
+        const healthLevelDisplay = document.getElementById('healthLevel');
+        const firepowerLevelDisplay = document.getElementById('firepowerLevel');
+        const speedLevelDisplay = document.getElementById('speedLevel');
+        const sizeLevelDisplay = document.getElementById('sizeLevel');
+        const fireRateLevelDisplay = document.getElementById('fireRateLevel');
+
+        const currentShipImage = document.getElementById('currentShipImage');
         const currentShipName = document.getElementById('currentShipName');
-        const currentHealthStat = document.getElementById('currentHealthStat');
-        const currentFirepowerStat = document.getElementById('currentFirepowerStat');
-        const currentSpeedStat = document.getElementById('currentSpeedStat');
-
-        const selectedShipImage = document.getElementById('selectedShipImage');
-        const selectedShipName = document.getElementById('selectedShipName');
-        const displayHealth = document.getElementById('displayHealth');
-        const displayFirepower = document.getElementById('displayFirepower');
-        const displaySpeed = document.getElementById('displaySpeed');
-        const displayFireRate = document.getElementById('displayFireRate');
+        const shipBaseHealth = document.getElementById('shipBaseHealth');
+        const shipBaseFirepower = document.getElementById('shipBaseFirepower');
+        const shipBaseSpeed = document.getElementById('shipBaseSpeed');
+        const shipBaseSize = document.getElementById('shipBaseSize');
         const prevShipBtn = document.getElementById('prevShipBtn');
         const nextShipBtn = document.getElementById('nextShipBtn');
 
@@ -486,11 +540,10 @@
         let gold = 0;
         let player = {}; // Player object
         let bullets = []; // Array to hold active bullets
-        let aliens = [];  // Array to hold active aliens
-        let coins = [];   // Array to hold active coins
+        let aliens = []; // Array to hold active aliens
+        let coins = []; // Array to hold active coins
         let powerups = []; // Array to hold active power-ups
         let boss = null; // Boss object
-        let bossActive = false; // Flag for boss presence
 
         let keys = {}; // Object to track pressed keys for smooth movement
 
@@ -498,90 +551,101 @@
         let alienSpawnInterval = 1500; // Milliseconds between alien spawns
         let lastAlienSpawnTime = 0;
         let gameSpeedMultiplier = 1; // Increases over time for difficulty
-        let bossSpawnThreshold = 5000; // Score to trigger first boss spawn
-        let lastBossSpawnScore = 0;
+        let bossSpawnThreshold = 5000; // Score to trigger boss spawn
+        let bossActive = false;
 
-        // Upgrade costs and levels for individual stats (per ship)
+        // Upgrade costs and levels
         const UPGRADE_BASE_COST = {
             health: 50,
             firepower: 75,
             speed: 60,
+            size: 100,
+            fireRate: 90
         };
         const UPGRADE_COST_MULTIPLIER = 1.5; // Cost increases by this factor each level
-        const MAX_INDIVIDUAL_UPGRADE_LEVEL = 3; // Max levels for health, firepower, speed
+        const MAX_INDIVIDUAL_UPGRADE_LEVEL = 3; // Max levels for health, firepower, speed, size, fireRate
 
-        // Player Ship Definitions - Adjusted Health for 2000+ Max Health
-        const playerShips = [
+        let upgradeLevels = {
+            health: 0,
+            firepower: 0,
+            speed: 0,
+            size: 0,
+            fireRate: 0
+        };
+        let currentShipTier = 0; // Index of the current ship tier
+
+        // Ship Tier Data
+        const SHIP_TIERS = [
             {
-                name: "Basic Fighter",
-                src: 'https://i.ibb.co/Zp91vZM1/Add-a-subheading-3-removebg-preview.png',
-                baseWidth: 60,
-                baseHeight: 60,
-                baseHealth: 500, // Adjusted
+                name: "Scout",
+                image: 'https://i.ibb.co/Zp91vZM1/Add-a-subheading-3-removebg-preview.png',
+                baseHealth: 2000,
                 baseFirepower: 10,
                 baseSpeed: 5,
+                baseWidth: 40,
+                baseHeight: 40,
                 baseFireRate: 300,
-                cost: 0
+                cost: 0 // Starting ship
             },
             {
-                name: "Advanced Interceptor",
-                src: 'https://i.ibb.co/5gN4kQPm/Add-a-subheading-4-removebg-preview.png',
-                baseWidth: 70,
-                baseHeight: 70,
-                baseHealth: 700, // Adjusted
+                name: "Interceptor",
+                image: 'https://i.ibb.co/5gN4kQPm/Add-a-subheading-4-removebg-preview.png',
+                baseHealth: 2500,
                 baseFirepower: 15,
                 baseSpeed: 6,
+                baseWidth: 45,
+                baseHeight: 45,
                 baseFireRate: 250,
-                cost: 1000
+                cost: 1000 // Cost to upgrade to this ship
             },
             {
-                name: "Galactic Cruiser",
-                src: 'https://i.ibb.co/XxxmMMYG/Add-a-subheading-5-removebg-preview.png',
-                baseWidth: 80,
-                baseHeight: 80,
-                baseHealth: 900, // Adjusted
+                name: "Vanguard",
+                image: 'https://i.ibb.co/XxxmMMYG/Add-a-subheading-5-removebg-preview.png',
+                baseHealth: 3000,
                 baseFirepower: 20,
                 baseSpeed: 7,
+                baseWidth: 50,
+                baseHeight: 50,
                 baseFireRate: 200,
                 cost: 5000
             },
             {
-                name: "Cosmic Destroyer",
-                src: 'https://i.ibb.co/ns63zjhR/Add-a-subheading-6-removebg-preview.png',
-                baseWidth: 90,
-                baseHeight: 90,
-                baseHealth: 1200, // Adjusted
-                baseFirepower: 25,
+                name: "Dreadnought",
+                image: 'https://i.ibb.co/ns63zjhR/Add-a-subheading-6-removebg-preview.png',
+                baseHealth: 4000,
+                baseFirepower: 30,
                 baseSpeed: 8,
-                baseFireRate: 180,
+                baseWidth: 60,
+                baseHeight: 60,
+                baseFireRate: 150,
                 cost: 15000
             },
             {
-                name: "Star Conqueror",
-                src: 'https://i.ibb.co/0yBxnkXc/Add-a-subheading-7-removebg-preview.png',
-                baseWidth: 100,
-                baseHeight: 100,
-                baseHealth: 1500, // Adjusted
-                baseFirepower: 30,
+                name: "Titan",
+                image: 'https://i.ibb.co/0yBxnkXc/Add-a-subheading-7-removebg-preview.png',
+                baseHealth: 5000,
+                baseFirepower: 40,
                 baseSpeed: 9,
-                baseFireRate: 150,
+                baseWidth: 70,
+                baseHeight: 70,
+                baseFireRate: 100,
                 cost: 30000
             },
             {
-                name: "Omega Dreadnought",
-                src: 'https://i.ibb.co/LmryyQX/Add-a-subheading-8-removebg-preview.png',
-                baseWidth: 110,
-                baseHeight: 110,
-                baseHealth: 1850, // Adjusted for ~2000 max health
-                baseFirepower: 40,
+                name: "Cosmic Destroyer",
+                image: 'https://i.ibb.co/LmryyQX/Add-a-subheading-8-removebg-preview.png',
+                baseHealth: 7000,
+                baseFirepower: 50,
                 baseSpeed: 10,
-                baseFireRate: 120,
+                baseWidth: 80,
+                baseHeight: 80,
+                baseFireRate: 75,
                 cost: 50000
             }
         ];
 
-        // Alien Ship Definitions
-        const alienShips = [
+        // Alien Images
+        const ALIEN_IMAGES = [
             'https://i.ibb.co/H1wtjD3/21-removebg-preview.png',
             'https://i.ibb.co/qYZDjdYK/22-removebg-preview.png',
             'https://i.ibb.co/Sk0S6Ln/23-removebg-preview.png',
@@ -590,8 +654,8 @@
             'https://i.ibb.co/bMfTXBPs/26-removebg-preview.png'
         ];
 
-        // Boss Ship Definitions
-        const bossShips = [
+        // Boss Images
+        const BOSS_IMAGES = [
             'https://i.ibb.co/60tHqjVH/29-removebg-preview.png',
             'https://i.ibb.co/yc594vt1/28-removebg-preview.png',
             'https://i.ibb.co/cSGZdHtc/30-removebg-preview.png',
@@ -600,97 +664,95 @@
             'https://i.ibb.co/FT0nGkd/31-removebg-preview.png'
         ];
 
-        // Power-up Definitions
-        const powerUpTypes = [
-            { name: "Rapid Fire", emoji: "🔥", duration: 5000, effect: "fireRate" },
-            { name: "Shield", emoji: "🛡️", duration: 7000, effect: "shield" },
-            { name: "Gold Magnet", emoji: "🧲", duration: 10000, effect: "goldMagnet" }
+        // Preload all images
+        const ASSET_URLS = [
+            ...SHIP_TIERS.map(ship => ship.image),
+            ...ALIEN_IMAGES,
+            ...BOSS_IMAGES,
+            'https://i.ibb.co/CpNDPHHG/Gemini-Generated-Image-rqajpfrqajpfrqaj.png', // Background
+            'https://i.ibb.co/JRsMXc4G/Gemini-Generated-Image-gyfxkzgyfxkzgyfx.png' // Footer Logo
         ];
-        let activePowerUp = null;
-        let powerUpEndTime = 0;
-        let powerUpSpawnCounter = 0; // Counter for power-up spawning
-        const POWERUP_SPAWN_ALIEN_COUNT = 10; // Spawn a power-up every 10 aliens defeated
+        const loadedAssets = {};
 
-        // Preloaded Image Objects
-        const images = {};
-        const imageSources = [
-            // Player Ships
-            ...playerShips.map(ship => ship.src),
-            // Alien Ships
-            ...alienShips,
-            // Boss Ships
-            ...bossShips,
-            // Backgrounds and Logo
-            'https://i.ibb.co/CpNDPHHG/Gemini-Generated-Image-rqajpfrqajpfrqaj.png', // Main background
-            'https://i.ibb.co/JRsMXc4G/Gemini-Generated-Image-gyfxkzgyfxkzgyfx.png' // Footer logo
-        ];
+        function preloadAssets() {
+            let loadedCount = 0;
+            const totalAssets = ASSET_URLS.length;
 
-        // Current ship being viewed in the upgrade section
-        let viewedShipIndex = 0;
+            return new Promise((resolve) => {
+                ASSET_URLS.forEach(url => {
+                    const img = new Image();
+                    img.src = url;
+                    img.onload = () => {
+                        loadedAssets[url] = img;
+                        loadedCount++;
+                        if (loadedCount === totalAssets) {
+                            resolve();
+                        }
+                    };
+                    img.onerror = () => {
+                        console.error(`Failed to load image: ${url}`);
+                        loadedCount++; // Still count it to avoid infinite loading
+                        if (loadedCount === totalAssets) {
+                            resolve();
+                        }
+                    };
+                });
+            });
+        }
 
         // --- Game Entities (Classes) ---
 
         /**
-         * Represents the player's spaceship.
+         * Base class for game objects that have position, dimensions, and an image.
          */
-        class Player {
-            constructor() {
-                this.currentShipIndex = 0; // This will be set by initializeGame or buyNewShip
-                this.upgradeLevels = { // Individual upgrades for the current ship
-                    health: 0,
-                    firepower: 0,
-                    speed: 0,
-                };
-                this.loadShipStats(); // Load stats based on currentShipIndex
-                this.x = canvas.width / 2 - this.width / 2;
-                this.y = canvas.height - this.height - 20;
-                this.health = this.maxHealth; // Start with full health
-                this.lastShotTime = 0;
-                this.isShielded = false;
+        class GameObject {
+            constructor(x, y, width, height, imageSrc) {
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.image = loadedAssets[imageSrc]; // Use preloaded image
             }
 
             /**
-             * Loads the current ship's base stats and applies individual upgrades.
-             */
-            loadShipStats() {
-                const ship = playerShips[this.currentShipIndex];
-                this.image = images[ship.src];
-                this.width = ship.baseWidth;
-                this.height = ship.baseHeight;
-                this.baseSpeed = ship.baseSpeed;
-                this.baseHealth = ship.baseHealth;
-                this.baseFirepower = ship.baseFirepower;
-                this.baseFireRate = ship.baseFireRate;
-
-                // Apply individual upgrades on top of base stats
-                this.maxHealth = this.baseHealth + (this.upgradeLevels.health * 50); // +50 max health per level
-                this.firepower = this.baseFirepower + (this.upgradeLevels.firepower * 5); // +5 damage per level
-                this.speed = this.baseSpeed + (this.upgradeLevels.speed * 1.5); // +1.5 speed per level
-                this.fireRate = this.baseFireRate - (this.upgradeLevels.firepower * 20); // Faster fire rate with firepower upgrades
-
-                // Ensure fireRate doesn't go below a minimum
-                this.fireRate = Math.max(50, this.fireRate);
-            }
-
-            /**
-             * Draws the player on the canvas.
+             * Draws the object on the canvas.
+             * If image is not loaded, draw a fallback rectangle.
              */
             draw() {
                 if (this.image && this.image.complete) {
                     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 } else {
-                    // Fallback if image not loaded
-                    ctx.fillStyle = 'blue';
+                    ctx.fillStyle = 'gray'; // Fallback color
                     ctx.fillRect(this.x, this.y, this.width, this.height);
                 }
+            }
+        }
 
-                if (this.isShielded) {
-                    ctx.beginPath();
-                    ctx.arc(this.x + this.width / 2, this.y + this.height / 2, this.width / 2 + 10, 0, Math.PI * 2);
-                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.7)';
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
-                }
+        /**
+         * Represents the player's spaceship.
+         */
+        class Player extends GameObject {
+            constructor(shipTierData) {
+                super(
+                    canvas.width / 2 - shipTierData.baseWidth / 2,
+                    canvas.height - shipTierData.baseHeight - 20,
+                    shipTierData.baseWidth,
+                    shipTierData.baseHeight,
+                    shipTierData.image
+                );
+                this.baseSpeed = shipTierData.baseSpeed;
+                this.speed = this.baseSpeed;
+                this.baseHealth = shipTierData.baseHealth;
+                this.health = this.baseHealth;
+                this.maxHealth = this.baseHealth; // Max health for health bar
+                this.baseFirepower = shipTierData.baseFirepower; // Damage per bullet
+                this.firepower = this.baseFirepower;
+                this.baseFireRate = shipTierData.baseFireRate; // Milliseconds between shots
+                this.fireRate = this.baseFireRate;
+                this.lastShotTime = 0;
+                this.isInvincible = false; // For power-ups
+                this.rapidFireActive = false; // For power-ups
+                this.rapidFireEndTime = 0;
             }
 
             /**
@@ -709,15 +771,16 @@
                 if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
 
                 // Handle shooting
-                // Apply rapid fire effect if active
-                let currentFireRate = this.fireRate;
-                if (activePowerUp && activePowerUp.effect === "fireRate") {
-                    currentFireRate /= 2; // Double fire rate
-                }
-
+                const currentFireRate = this.rapidFireActive ? this.fireRate / 2 : this.fireRate; // Faster fire rate if active
                 if (keys['Space'] && (Date.now() - this.lastShotTime > currentFireRate)) {
                     this.shoot();
                     this.lastShotTime = Date.now();
+                }
+
+                // Check rapid fire duration
+                if (this.rapidFireActive && Date.now() > this.rapidFireEndTime) {
+                    this.rapidFireActive = false;
+                    showMessage("Rapid Fire ended!", 'info');
                 }
             }
 
@@ -733,16 +796,15 @@
              * @param {number} damage The amount of damage to take.
              */
             takeDamage(damage) {
-                if (this.isShielded) {
-                    showMessage("Shield absorbed damage!");
-                    return; // No damage taken if shielded
-                }
+                if (this.isInvincible) return; // Don't take damage if invincible
+
                 this.health -= damage;
                 if (this.health <= 0) {
                     this.health = 0;
                     gameOver();
                 }
                 updateUI();
+                showMessage(`Took ${damage} damage! Health: ${this.health}`, 'warning');
             }
 
             /**
@@ -752,29 +814,47 @@
             heal(amount) {
                 this.health = Math.min(this.maxHealth, this.health + amount);
                 updateUI();
+                showMessage(`Healed +${amount} health!`, 'info');
+            }
+
+            /**
+             * Sets player invincibility for a duration.
+             * @param {number} durationMs Duration in milliseconds.
+             */
+            setInvincibility(durationMs) {
+                this.isInvincible = true;
+                showMessage("Invincibility activated!", 'info');
+                setTimeout(() => {
+                    this.isInvincible = false;
+                    showMessage("Invincibility ended!", 'info');
+                }, durationMs);
+            }
+
+            /**
+             * Activates rapid fire for a duration.
+             * @param {number} durationMs Duration in milliseconds.
+             */
+            activateRapidFire(durationMs) {
+                this.rapidFireActive = true;
+                this.rapidFireEndTime = Date.now() + durationMs;
+                showMessage("Rapid Fire activated!", 'info');
             }
         }
 
         /**
          * Represents a bullet fired by the player.
          */
-        class Bullet {
+        class Bullet extends GameObject {
             constructor(x, y, damage) {
-                this.x = x;
-                this.y = y;
-                this.width = 10;
-                this.height = 20;
-                this.speed = 10;
+                super(x, y, 10, 20, null); // No image for bullet, draw emoji
+                this.speed = 15;
                 this.damage = damage;
-                this.emoji = '⚡'; // Fallback emoji
+                this.emoji = '⚡';
             }
 
-            /**
-             * Draws the bullet on the canvas.
-             */
             draw() {
-                ctx.fillStyle = 'yellow';
-                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.font = `${this.height}px Arial`;
+                ctx.fillText(this.emoji, this.x, this.y);
             }
 
             /**
@@ -788,31 +868,20 @@
         /**
          * Represents an alien enemy.
          */
-        class Alien {
+        class Alien extends GameObject {
             constructor(x, y, level) {
-                this.x = x;
-                this.y = y;
-                this.width = 35;
-                this.height = 35;
+                const alienImageIndex = Math.min(level, ALIEN_IMAGES.length - 1);
+                const imageSrc = ALIEN_IMAGES[alienImageIndex];
+                const width = 35 + (level * 2); // Scale width with level
+                const height = 35 + (level * 2); // Scale height with level
+                super(x, y, width, height, imageSrc);
+
                 this.baseSpeed = 1 + (level * 0.2); // Speed increases with level
                 this.speed = this.baseSpeed * gameSpeedMultiplier;
                 this.baseHealth = 20 + (level * 5); // Health increases with level
                 this.health = this.baseHealth;
-                this.image = images[alienShips[level % alienShips.length]]; // Cycle through alien images
                 this.goldValue = 10 + (level * 2); // Gold value increases with level
                 this.scoreValue = 100 + (level * 20); // Score value increases with level
-            }
-
-            /**
-             * Draws the alien on the canvas.
-             */
-            draw() {
-                if (this.image && this.image.complete) {
-                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-                } else {
-                    ctx.font = `${this.height}px Arial`;
-                    ctx.fillText('👽', this.x, this.y + this.height); // Fallback emoji
-                }
             }
 
             /**
@@ -839,70 +908,51 @@
         /**
          * Represents a boss enemy.
          */
-        class Boss {
-            constructor(level) {
-                this.width = 120;
-                this.height = 120;
-                this.x = canvas.width / 2 - this.width / 2;
-                this.y = -this.height; // Start off-screen
-                this.speed = 0.5 + (level * 0.1);
-                this.health = 500 + (level * 100);
-                this.maxHealth = this.health;
-                this.damage = 1; // Damage per tick to player
-                this.attackInterval = 500; // Milliseconds between attacks
-                this.lastAttackTime = 0;
-                this.image = images[bossShips[level % bossShips.length]]; // Cycle through boss images
+        class Boss extends GameObject {
+            constructor(x, y, level) {
+                const bossImageIndex = Math.min(level, BOSS_IMAGES.length - 1);
+                const imageSrc = BOSS_IMAGES[bossImageIndex];
+                const width = 100 + (level * 10); // Scale width with level
+                const height = 100 + (level * 10); // Scale height with level
+                super(x, y, width, height, imageSrc);
+
+                this.baseHealth = 500 + (level * 100);
+                this.health = this.baseHealth;
+                this.maxHealth = this.baseHealth;
+                this.speed = 1; // Boss moves slower
                 this.goldValue = 500 + (level * 100);
-                this.scoreValue = 5000 + (level * 1000);
-                this.targetY = 50; // Y position where boss stops
-                this.movingDown = true;
+                this.scoreValue = 1000 + (level * 200);
+                this.attackDamage = 1; // Boss reduces health by one per hit
+                this.attackInterval = 1000; // Boss attacks every 1 second
+                this.lastAttackTime = Date.now();
+                this.direction = 1; // 1 for right, -1 for left
             }
 
-            /**
-             * Draws the boss on the canvas.
-             */
-            draw() {
-                if (this.image && this.image.complete) {
-                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-                } else {
-                    ctx.fillStyle = 'red';
-                    ctx.fillRect(this.x, this.y, this.width, this.height); // Fallback
-                }
-                // Draw health bar
-                const healthBarWidth = this.width;
-                const healthBarHeight = 10;
-                const healthBarX = this.x;
-                const healthBarY = this.y - 15;
-                ctx.fillStyle = 'gray';
-                ctx.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
-                ctx.fillStyle = 'lime';
-                ctx.fillRect(healthBarX, healthBarY, (this.health / this.maxHealth) * healthBarWidth, healthBarHeight);
-            }
-
-            /**
-             * Updates the boss's position and attacks.
-             */
             update() {
-                if (this.movingDown) {
-                    this.y += this.speed;
-                    if (this.y >= this.targetY) {
-                        this.y = this.targetY;
-                        this.movingDown = false;
-                    }
+                // Move horizontally within canvas
+                this.x += this.speed * this.direction;
+                if (this.x + this.width > canvas.width || this.x < 0) {
+                    this.direction *= -1; // Change direction
+                    this.x = Math.max(0, Math.min(canvas.width - this.width, this.x)); // Clamp to bounds
                 }
 
-                // Boss attacks player periodically
+                // Boss attack (periodically damage player)
                 if (Date.now() - this.lastAttackTime > this.attackInterval) {
-                    player.takeDamage(this.damage);
+                    player.takeDamage(this.attackDamage);
+                    showMessage("Boss attacked! Health reduced by 1.", 'warning');
                     this.lastAttackTime = Date.now();
                 }
             }
 
-            /**
-             * Reduces boss health.
-             * @param {number} damage The amount of damage to take.
-             * @returns {boolean} True if the boss is destroyed, false otherwise.
-             */
+            draw() {
+                super.draw();
+                // Draw health bar for boss
+                ctx.fillStyle = 'red';
+                ctx.fillRect(this.x, this.y - 15, this.width, 5);
+                ctx.fillStyle = 'green';
+                ctx.fillRect(this.x, this.y - 15, this.width * (this.health / this.maxHealth), 5);
+            }
+
             takeDamage(damage) {
                 this.health -= damage;
                 if (this.health <= 0) {
@@ -915,20 +965,14 @@
         /**
          * Represents a gold coin.
          */
-        class Coin {
+        class Coin extends GameObject {
             constructor(x, y, value) {
-                this.x = x;
-                this.y = y;
-                this.width = 25;
-                this.height = 25;
+                super(x, y, 25, 25, null); // No image for coin, draw emoji
                 this.speed = 3;
                 this.value = value;
                 this.emoji = '💰';
             }
 
-            /**
-             * Draws the coin on the canvas.
-             */
             draw() {
                 ctx.font = `${this.height}px Arial`;
                 ctx.fillText(this.emoji, this.x, this.y + this.height);
@@ -945,84 +989,45 @@
         /**
          * Represents a power-up.
          */
-        class PowerUp {
+        class PowerUp extends GameObject {
             constructor(x, y, type) {
-                this.x = x;
-                this.y = y;
-                this.width = 30;
-                this.height = 30;
+                super(x, y, 30, 30, null); // No image for power-up, draw emoji
                 this.speed = 2;
-                this.type = type; // Object from powerUpTypes
+                this.type = type; // 'health', 'rapid_fire', 'invincibility'
+                this.emoji = '';
+                if (this.type === 'health') this.emoji = '❤️';
+                else if (this.type === 'rapid_fire') this.emoji = '🔥';
+                else if (this.type === 'invincibility') this.emoji = '🛡️';
             }
 
-            /**
-             * Draws the power-up on the canvas.
-             */
             draw() {
                 ctx.font = `${this.height}px Arial`;
-                ctx.fillText(this.type.emoji, this.x, this.y + this.height);
+                ctx.fillText(this.emoji, this.x, this.y + this.height);
             }
 
-            /**
-             * Updates the power-up's position.
-             */
             update() {
                 this.y += this.speed;
             }
+
+            applyEffect() {
+                if (this.type === 'health') {
+                    player.heal(player.maxHealth * 0.2); // Heal 20% of max health
+                } else if (this.type === 'rapid_fire') {
+                    player.activateRapidFire(5000); // 5 seconds of rapid fire
+                } else if (this.type === 'invincibility') {
+                    player.setInvincibility(3000); // 3 seconds of invincibility
+                }
+            }
         }
+
 
         // --- Game Functions ---
-
-        /**
-         * Preloads all necessary images before starting the game.
-         */
-        function preloadAssets() {
-            let loadedCount = 0;
-            const totalAssets = imageSources.length;
-
-            if (totalAssets === 0) {
-                hidePreloader();
-                return;
-            }
-
-            imageSources.forEach(src => {
-                const img = new Image();
-                img.src = src;
-                img.onload = () => {
-                    images[src] = img;
-                    loadedCount++;
-                    if (loadedCount === totalAssets) {
-                        hidePreloader();
-                    }
-                };
-                img.onerror = () => {
-                    console.error(`Failed to load image: ${src}`);
-                    loadedCount++; // Still increment to avoid endless loading if an image fails
-                    if (loadedCount === totalAssets) {
-                        hidePreloader();
-                    }
-                };
-            });
-        }
-
-        /**
-         * Hides the preloader and shows the main game content.
-         */
-        function hidePreloader() {
-            preloader.classList.add('hidden');
-            preloader.addEventListener('transitionend', () => {
-                preloader.style.display = 'none';
-                gameWrapper.classList.add('show');
-                gameFooter.classList.add('show');
-                initializeGame(); // Initialize game after assets are loaded
-            }, { once: true });
-        }
-
 
         /**
          * Initializes or resets the game state.
          */
         function initializeGame() {
+            gameActive = false;
             score = 0;
             gold = 0;
             bullets = [];
@@ -1036,27 +1041,29 @@
             lastAlienSpawnTime = 0;
             gameSpeedMultiplier = 1;
             bossSpawnThreshold = 5000;
-            lastBossSpawnScore = 0;
-            powerUpSpawnCounter = 0;
-            activePowerUp = null;
-            powerUpEndTime = 0;
 
-            player = new Player(); // Create new player instance (defaults to first ship)
-            viewedShipIndex = player.currentShipIndex; // Set viewed ship to current player ship
+            // Reset upgrade levels and costs
+            upgradeLevels = {
+                health: 0,
+                firepower: 0,
+                speed: 0,
+                size: 0,
+                fireRate: 0
+            };
+            currentShipTier = 0; // Start with the first ship
+
+            player = new Player(SHIP_TIERS[currentShipTier]); // Create new player instance with current tier
+            applyUpgrades(); // Apply initial upgrades (none at start)
 
             updateUI();
             updateUpgradeButtonCosts();
             checkUpgradeButtonStates();
-            displayShipDetails(viewedShipIndex); // Display initial ship details
-            showMessage("Welcome, pilot! Destroy aliens, collect gold, and upgrade your ship! Use A/D or Left/Right arrows to move, Spacebar to shoot.");
+            updateShipDisplay();
+            showMessage("Welcome, pilot! Destroy aliens, collect gold, and upgrade your ship! Use A/D or Left/Right arrows to move, Spacebar to shoot.", 'info');
             startButton.style.display = 'block';
-            // Ensure canvas is not full screen in menu and game wrapper is visible
-            canvas.classList.remove('fullscreen');
-            canvas.style.opacity = '0'; // Ensure canvas starts hidden in menu
-            gameWrapper.classList.remove('hide'); // Ensure wrapper is not hidden
-            gameWrapper.style.display = 'flex';
-            gameFooter.classList.remove('hide');
-            gameFooter.style.display = 'block';
+            gameScreen.classList.remove('game-active-full-screen');
+            gameScreen.classList.remove('hidden'); // Ensure game screen is visible initially
+            gameWrapper.style.padding = '2rem'; // Restore padding for menu view
         }
 
         /**
@@ -1077,41 +1084,20 @@
             lastAlienSpawnTime = Date.now(); // Reset spawn timer
             gameSpeedMultiplier = 1;
             bossSpawnThreshold = 5000;
-            lastBossSpawnScore = 0;
-            powerUpSpawnCounter = 0;
-            activePowerUp = null;
-            powerUpEndTime = 0;
 
-            // Hide game wrapper and footer with transition
-            gameWrapper.classList.remove('show');
-            gameWrapper.classList.add('hide');
-            gameFooter.classList.remove('show');
-            gameFooter.classList.add('hide');
-
-            // Set canvas to full screen and fade in
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            canvas.classList.add('fullscreen');
-            canvas.style.opacity = '1'; // Make canvas visible
-
-            // Wait for gameWrapper to fade out before setting its display to none
-            setTimeout(() => {
-                gameWrapper.style.display = 'none';
-                gameFooter.style.display = 'none';
-            }, 1000); // Match CSS transition duration for opacity
-
-            // Re-initialize player with current ship and upgrade levels
-            player = new Player();
-            player.x = canvas.width / 2 - player.width / 2; // Reposition player for new canvas size
-            player.y = canvas.height - player.height - 20;
-            player.health = player.maxHealth; // Ensure full health at start of new game
-            player.isShielded = false; // Reset shield status
+            // Re-initialize player with current ship tier's base stats and then apply individual upgrades
+            player = new Player(SHIP_TIERS[currentShipTier]);
+            applyUpgrades(); // Re-apply individual upgrades based on saved levels
 
             updateUI();
             updateUpgradeButtonCosts();
-            checkUpgradeButtonStates(); // Ensure buttons are correct at start
-            hideMessage();
+            checkUpgradeButtonStates();
+            messageBox.classList.remove('show');
             startButton.style.display = 'none';
+
+            // Transition to full screen game view
+            gameScreen.classList.add('game-active-full-screen');
+            gameWrapper.style.padding = '0'; // Remove padding for full screen game
 
             gameLoop(); // Start the game loop
         }
@@ -1120,38 +1106,11 @@
          * The main game loop, updates game state and redraws elements.
          */
         function gameLoop() {
-            if (!gameActive) {
-                // If game is not active, but canvas is fullscreen (meaning it was just game over),
-                // reset canvas size and show game wrapper.
-                if (canvas.classList.contains('fullscreen')) {
-                    canvas.classList.remove('fullscreen');
-                    canvas.style.opacity = '0'; // Fade out canvas
-                    canvas.width = 600; // Reset to default menu size
-                    canvas.height = 400;
-
-                    // Show game wrapper and footer with transition
-                    gameWrapper.style.display = 'flex';
-                    gameFooter.style.display = 'block';
-                    setTimeout(() => {
-                        gameWrapper.classList.remove('hide');
-                        gameWrapper.classList.add('show');
-                        gameFooter.classList.remove('hide');
-                        gameFooter.classList.add('show');
-                    }, 10); // Small delay to re-apply 'show' class after display is set
-                }
-                return;
-            }
+            if (!gameActive) return;
 
             ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
 
             const currentTime = Date.now();
-
-            // --- Power-up duration check ---
-            if (activePowerUp && currentTime > powerUpEndTime) {
-                showMessage(`${activePowerUp.type.name} power-up expired!`);
-                activePowerUp = null;
-                player.isShielded = false; // Turn off shield if it was active
-            }
 
             // --- Player Update ---
             player.update();
@@ -1172,13 +1131,12 @@
             // --- Alien Spawning ---
             if (!bossActive && currentTime - lastAlienSpawnTime > alienSpawnInterval) {
                 const alienX = Math.random() * (canvas.width - 40);
-                const alienLevel = Math.floor(score / 500); // Alien level based on score
-                aliens.push(new Alien(alienX, -40, alienLevel));
+                aliens.push(new Alien(alienX, -40, Math.floor(score / 500))); // Alien level based on score
                 lastAlienSpawnTime = currentTime;
 
                 // Gradually increase game speed and decrease spawn interval
-                gameSpeedMultiplier += 0.005;
-                alienSpawnInterval = Math.max(500, alienSpawnInterval - 10); // Min interval 500ms
+                gameSpeedMultiplier += 0.001; // Slower increase
+                alienSpawnInterval = Math.max(400, alienSpawnInterval - 5); // Min interval 400ms
             }
 
             // --- Alien Updates ---
@@ -1200,22 +1158,19 @@
                 }
             }
 
-            // --- Boss Spawning and Update ---
-            if (!bossActive && score >= bossSpawnThreshold && score > lastBossSpawnScore) {
-                const bossLevel = Math.floor(score / bossSpawnThreshold);
-                boss = new Boss(bossLevel);
+            // --- Boss Logic ---
+            if (!bossActive && score >= bossSpawnThreshold) {
+                boss = new Boss(canvas.width / 2 - 50, -100, Math.floor(score / bossSpawnThreshold));
                 bossActive = true;
-                lastBossSpawnScore = score; // Update last boss spawn score
-                showMessage("A powerful enemy approaches!");
+                showMessage("A giant boss approaches!", 'danger');
             }
 
-            if (bossActive && boss) {
+            if (boss) {
                 boss.update();
                 boss.draw();
-                // If boss goes off screen (shouldn't happen with current logic, but good for robustness)
-                if (boss.y > canvas.height) {
-                    bossActive = false;
-                    boss = null;
+                // Check collision with player
+                if (checkCollision(player, boss)) {
+                    player.takeDamage(boss.attackDamage);
                 }
             }
 
@@ -1227,15 +1182,11 @@
 
                 // Check collision with player to collect coin
                 if (checkCollision(player, coin)) {
-                    let collectedGold = coin.value;
-                    if (activePowerUp && activePowerUp.effect === "goldMagnet") {
-                        collectedGold *= 2; // Double gold if magnet is active
-                        showMessage(`Gold magnet: +${collectedGold} gold!`);
-                    }
-                    gold += collectedGold;
+                    gold += coin.value;
                     coins.splice(i, 1); // Remove coin
                     updateUI();
                     checkUpgradeButtonStates(); // Recheck upgrade buttons after collecting gold
+                    showMessage(`+${coin.value} Gold!`, 'success');
                     continue;
                 }
 
@@ -1245,16 +1196,24 @@
                 }
             }
 
-            // --- PowerUp Updates ---
+            // --- Power-up Spawning ---
+            if (Math.random() < 0.001 && powerups.length < 2) { // Small chance to spawn a power-up
+                const powerUpX = Math.random() * (canvas.width - 30);
+                const types = ['health', 'rapid_fire', 'invincibility'];
+                const randomType = types[Math.floor(Math.random() * types.length)];
+                powerups.push(new PowerUp(powerUpX, -30, randomType));
+            }
+
+            // --- Power-up Updates ---
             for (let i = powerups.length - 1; i >= 0; i--) {
                 const powerup = powerups[i];
                 powerup.update();
                 powerup.draw();
 
-                // Check collision with player to collect power-up
+                // Check collision with player
                 if (checkCollision(player, powerup)) {
-                    activatePowerUp(powerup.type);
-                    powerups.splice(i, 1); // Remove power-up
+                    powerup.applyEffect();
+                    powerups.splice(i, 1);
                     continue;
                 }
 
@@ -1268,87 +1227,48 @@
             // --- Collision Detection (Bullets vs Aliens) ---
             for (let i = bullets.length - 1; i >= 0; i--) {
                 const bullet = bullets[i];
-                for (let j = aliens.length - 1; j >= 0; j--) {
-                    const alien = aliens[j];
+                let bulletHit = false;
 
-                    if (checkCollision(bullet, alien)) {
-                        bullets.splice(i, 1); // Remove bullet
-                        if (alien.takeDamage(bullet.damage)) {
-                            // Alien destroyed
-                            score += alien.scoreValue;
-                            gold += alien.goldValue;
-                            // Spawn a coin at alien's position
-                            coins.push(new Coin(alien.x + alien.width / 2 - 12.5, alien.y + alien.height / 2 - 12.5, alien.goldValue));
-                            aliens.splice(j, 1); // Remove alien
-                            powerUpSpawnCounter++; // Increment counter for power-up spawning
-                            if (powerUpSpawnCounter >= POWERUP_SPAWN_ALIEN_COUNT) {
-                                spawnRandomPowerUp(alien.x, alien.y);
-                                powerUpSpawnCounter = 0;
-                            }
-                            updateUI();
-                            checkUpgradeButtonStates(); // Recheck upgrade buttons after earning gold
-                        }
-                        break; // Bullet hit an alien, no need to check other aliens for this bullet
-                    }
-                }
-
-                // Check collision with Boss
-                if (bossActive && boss && checkCollision(bullet, boss)) {
+                // Check against boss first
+                if (boss && checkCollision(bullet, boss)) {
                     bullets.splice(i, 1); // Remove bullet
                     if (boss.takeDamage(bullet.damage)) {
-                        // Boss destroyed
                         score += boss.scoreValue;
                         gold += boss.goldValue;
+                        coins.push(new Coin(boss.x + boss.width / 2 - 12.5, boss.y + boss.height / 2 - 12.5, boss.goldValue));
+                        boss = null; // Boss destroyed
                         bossActive = false;
-                        boss = null;
-                        showMessage("Boss defeated! You earned a lot of gold!");
-                        // Increase next boss spawn threshold
-                        bossSpawnThreshold += 5000;
-                        // Guarantee a power-up drop from boss
-                        spawnRandomPowerUp(canvas.width / 2, canvas.height / 4);
+                        bossSpawnThreshold += 5000; // Increase threshold for next boss
+                        showMessage("Boss defeated! Great job!", 'success');
                     }
-                    updateUI();
-                    checkUpgradeButtonStates();
+                    bulletHit = true;
+                }
+
+                if (!bulletHit) {
+                    for (let j = aliens.length - 1; j >= 0; j--) {
+                        const alien = aliens[j];
+
+                        if (checkCollision(bullet, alien)) {
+                            bullets.splice(i, 1); // Remove bullet
+                            if (alien.takeDamage(bullet.damage)) {
+                                // Alien destroyed
+                                score += alien.scoreValue;
+                                gold += alien.goldValue;
+                                // Spawn a coin at alien's position
+                                coins.push(new Coin(alien.x + alien.width / 2 - 12.5, alien.y + alien.height / 2 - 12.5, alien.goldValue));
+                                aliens.splice(j, 1); // Remove alien
+                                updateUI();
+                                checkUpgradeButtonStates(); // Recheck upgrade buttons after earning gold
+                            }
+                            bulletHit = true;
+                            break; // Bullet hit an alien, no need to check other aliens for this bullet
+                        }
+                    }
                 }
             }
 
             requestAnimationFrame(gameLoop); // Continue the loop
         }
-
-        /**
-         * Spawns a random power-up at the given coordinates.
-         * @param {number} x X-coordinate for power-up spawn.
-         * @param {number} y Y-coordinate for power-up spawn.
-         */
-        function spawnRandomPowerUp(x, y) {
-            const randomType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
-            powerups.push(new PowerUp(x, y, randomType));
-        }
-
-        /**
-         * Activates a collected power-up.
-         * @param {object} type The power-up type object.
-         */
-        function activatePowerUp(type) {
-            // Deactivate any existing power-up first
-            if (activePowerUp) {
-                showMessage(`${activePowerUp.type.name} power-up replaced by ${type.name}!`);
-                player.isShielded = false; // Ensure shield is off if it was the previous power-up
-            } else {
-                showMessage(`Power-up collected: ${type.name}!`);
-            }
-
-            activePowerUp = { type: type, startTime: Date.now() };
-            powerUpEndTime = Date.now() + type.duration;
-
-            switch (type.effect) {
-                case "shield":
-                    player.isShielded = true;
-                    break;
-                // Rapid fire and gold magnet are handled in player.update() and gameLoop collision
-            }
-        }
-
 
         /**
          * Checks for collision between two rectangular objects.
@@ -1371,29 +1291,37 @@
             scoreDisplay.textContent = score;
             goldDisplay.textContent = gold;
             healthDisplay.textContent = player.health;
-            shipLevelDisplay.textContent = `Level ${player.currentShipIndex + 1}`;
-
-            // Update current ship stats display in the info line
-            currentShipName.textContent = playerShips[player.currentShipIndex].name;
-            currentHealthStat.textContent = player.maxHealth;
-            currentFirepowerStat.textContent = player.firepower;
-            currentSpeedStat.textContent = player.speed;
         }
 
         /**
          * Displays a message in the message box.
-         * @param {string} message The message to display.
+         * @param {string} text The message to display.
+         * @param {string} type 'info', 'success', 'warning', 'danger' for styling.
          */
-        function showMessage(message) {
-            messageBox.textContent = message;
-            messageBox.classList.add('show');
-        }
-
-        /**
-         * Hides the message box.
-         */
-        function hideMessage() {
-            messageBox.classList.remove('show');
+        function showMessage(text, type = 'info') {
+            messageBox.textContent = text;
+            messageBox.className = 'message-box show'; // Reset classes
+            if (type === 'success') {
+                messageBox.style.backgroundColor = '#c6f6d5';
+                messageBox.style.borderColor = '#68d391';
+                messageBox.style.color = '#276749';
+            } else if (type === 'warning') {
+                messageBox.style.backgroundColor = '#fefcbf';
+                messageBox.style.borderColor = '#fbd38d';
+                messageBox.style.color = '#975a16';
+            } else if (type === 'danger') {
+                messageBox.style.backgroundColor = '#fed7d7';
+                messageBox.style.borderColor = '#fc8181';
+                messageBox.style.color = '#9b2c2c';
+            } else { // info
+                messageBox.style.backgroundColor = '#bee3f8';
+                messageBox.style.borderColor = '#63b3ed';
+                messageBox.style.color = '#2c5282';
+            }
+            // Hide after a few seconds
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
         }
 
         /**
@@ -1401,57 +1329,45 @@
          */
         function gameOver() {
             gameActive = false;
-            showMessage(`Game Over! Your final score: ${score}. You collected ${gold} gold. Click 'Start Game' to try again!`);
+            showMessage(`Game Over! Your final score: ${score}. You collected ${gold} gold. Click 'Start Game' to try again!`, 'danger');
             startButton.style.display = 'block';
-            // Reset canvas size and show game wrapper after a short delay for transition
-            setTimeout(() => {
-                canvas.classList.remove('fullscreen');
-                canvas.style.opacity = '0'; // Fade out canvas
-                canvas.width = 600; // Reset to default menu size
-                canvas.height = 400;
-
-                // Show game wrapper and footer with transition
-                gameWrapper.style.display = 'flex';
-                gameFooter.style.display = 'block';
-                setTimeout(() => {
-                    gameWrapper.classList.remove('hide');
-                    gameWrapper.classList.add('show');
-                    gameFooter.classList.remove('hide');
-                    gameFooter.classList.add('show');
-                }, 10); // Small delay to re-apply 'show' class after display is set
-
-                // Re-display the currently owned ship in the selection area after game over
-                viewedShipIndex = player.currentShipIndex;
-                displayShipDetails(viewedShipIndex);
-                updateUpgradeButtonCosts();
-                checkUpgradeButtonStates();
-            }, 500); // Small delay for visual effect
+            gameScreen.classList.remove('game-active-full-screen'); // Exit full screen
+            gameWrapper.style.padding = '2rem'; // Restore padding for menu view
         }
 
         /**
-         * Calculates the cost of an individual upgrade (health, firepower, speed) based on its type and current level.
+         * Calculates the cost of an individual upgrade based on its type and current level.
          * @param {string} type The type of upgrade (e.g., 'health', 'firepower').
          * @returns {number} The calculated cost.
          */
         function getIndividualUpgradeCost(type) {
-            return Math.floor(UPGRADE_BASE_COST[type] * Math.pow(UPGRADE_COST_MULTIPLIER, player.upgradeLevels[type]));
+            return Math.floor(UPGRADE_BASE_COST[type] * Math.pow(UPGRADE_COST_MULTIPLIER, upgradeLevels[type]));
         }
 
         /**
-         * Updates the cost displayed on upgrade buttons.
+         * Updates the cost displayed on individual upgrade buttons.
          */
         function updateUpgradeButtonCosts() {
-            healthCostDisplay.textContent = getIndividualUpgradeCost('health');
-            firepowerCostDisplay.textContent = getIndividualUpgradeCost('firepower');
-            speedCostDisplay.textContent = getIndividualUpgradeCost('speed');
+            healthCostDisplay.textContent = upgradeLevels.health < MAX_INDIVIDUAL_UPGRADE_LEVEL ? getIndividualUpgradeCost('health') : 'MAX';
+            firepowerCostDisplay.textContent = upgradeLevels.firepower < MAX_INDIVIDUAL_UPGRADE_LEVEL ? getIndividualUpgradeCost('firepower') : 'MAX';
+            speedCostDisplay.textContent = upgradeLevels.speed < MAX_INDIVIDUAL_UPGRADE_LEVEL ? getIndividualUpgradeCost('speed') : 'MAX';
+            sizeCostDisplay.textContent = upgradeLevels.size < MAX_INDIVIDUAL_UPGRADE_LEVEL ? getIndividualUpgradeCost('size') : 'MAX';
+            fireRateCostDisplay.textContent = upgradeLevels.fireRate < MAX_INDIVIDUAL_UPGRADE_LEVEL ? getIndividualUpgradeCost('fireRate') : 'MAX';
 
-            const nextShipIndex = viewedShipIndex + 1;
-            if (viewedShipIndex < playerShips.length - 1) { // If not the last ship
-                newShipCostDisplay.textContent = playerShips[viewedShipIndex].cost; // Cost of the currently viewed ship
-                buyNewShipBtn.style.display = 'flex'; // Show button if more ships available
+            healthLevelDisplay.textContent = `(${upgradeLevels.health}/${MAX_INDIVIDUAL_UPGRADE_LEVEL})`;
+            firepowerLevelDisplay.textContent = `(${upgradeLevels.firepower}/${MAX_INDIVIDUAL_UPGRADE_LEVEL})`;
+            speedLevelDisplay.textContent = `(${upgradeLevels.speed}/${MAX_INDIVIDUAL_UPGRADE_LEVEL})`;
+            sizeLevelDisplay.textContent = `(${upgradeLevels.size}/${MAX_INDIVIDUAL_UPGRADE_LEVEL})`;
+            fireRateLevelDisplay.textContent = `(${upgradeLevels.fireRate}/${MAX_INDIVIDUAL_UPGRADE_LEVEL})`;
+
+            // Ship tier upgrade cost
+            const nextShipTier = currentShipTier + 1;
+            if (nextShipTier < SHIP_TIERS.length) {
+                shipTierCostDisplay.textContent = SHIP_TIERS[nextShipTier].cost;
+                upgradeShipTierBtn.disabled = gold < SHIP_TIERS[nextShipTier].cost;
             } else {
-                newShipCostDisplay.textContent = 'MAX';
-                buyNewShipBtn.style.display = 'none'; // Hide if no more ships
+                shipTierCostDisplay.textContent = 'MAX';
+                upgradeShipTierBtn.disabled = true;
             }
         }
 
@@ -1459,71 +1375,101 @@
          * Checks and updates the enabled/disabled state of upgrade buttons.
          */
         function checkUpgradeButtonStates() {
-            // Individual upgrades
-            upgradeHealthBtn.disabled = gold < getIndividualUpgradeCost('health') || player.upgradeLevels.health >= MAX_INDIVIDUAL_UPGRADE_LEVEL || viewedShipIndex !== player.currentShipIndex;
-            upgradeFirepowerBtn.disabled = gold < getIndividualUpgradeCost('firepower') || player.upgradeLevels.firepower >= MAX_INDIVIDUAL_UPGRADE_LEVEL || viewedShipIndex !== player.currentShipIndex;
-            upgradeSpeedBtn.disabled = gold < getIndividualUpgradeCost('speed') || player.upgradeLevels.speed >= MAX_INDIVIDUAL_UPGRADE_LEVEL || viewedShipIndex !== player.currentShipIndex;
+            upgradeHealthBtn.disabled = gold < getIndividualUpgradeCost('health') || upgradeLevels.health >= MAX_INDIVIDUAL_UPGRADE_LEVEL;
+            upgradeFirepowerBtn.disabled = gold < getIndividualUpgradeCost('firepower') || upgradeLevels.firepower >= MAX_INDIVIDUAL_UPGRADE_LEVEL;
+            upgradeSpeedBtn.disabled = gold < getIndividualUpgradeCost('speed') || upgradeLevels.speed >= MAX_INDIVIDUAL_UPGRADE_LEVEL;
+            upgradeSizeBtn.disabled = gold < getIndividualUpgradeCost('size') || upgradeLevels.size >= MAX_INDIVIDUAL_UPGRADE_LEVEL;
+            upgradeFireRateBtn.disabled = gold < getIndividualUpgradeCost('fireRate') || upgradeLevels.fireRate >= MAX_INDIVIDUAL_UPGRADE_LEVEL;
 
-            // Update button text to "MAX" if maxed out
-            if (player.upgradeLevels.health >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
-                healthCostDisplay.textContent = 'MAX';
-            }
-            if (player.upgradeLevels.firepower >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
-                firepowerCostDisplay.textContent = 'MAX';
-            }
-            if (player.upgradeLevels.speed >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
-                speedCostDisplay.textContent = 'MAX';
-            }
-
-            // New ship upgrade button logic
-            if (viewedShipIndex === player.currentShipIndex) {
-                 // If currently viewing the owned ship, disable buy button for it
-                buyNewShipBtn.disabled = true;
-                newShipCostDisplay.textContent = 'OWNED';
-            } else if (viewedShipIndex < player.currentShipIndex) {
-                // If viewing a previously owned ship, disable buy button
-                buyNewShipBtn.disabled = true;
-                newShipCostDisplay.textContent = 'OWNED';
-            }
-            else {
-                // If viewing a future ship, enable/disable based on gold
-                const cost = playerShips[viewedShipIndex].cost;
-                buyNewShipBtn.disabled = gold < cost;
-                newShipCostDisplay.textContent = cost;
-            }
-
-            // Navigation buttons
-            prevShipBtn.disabled = viewedShipIndex === 0;
-            nextShipBtn.disabled = viewedShipIndex === playerShips.length - 1;
+            updateUpgradeButtonCosts(); // Ensure costs are updated too
         }
 
         /**
-         * Displays the details of a specific ship in the upgrade section.
-         * @param {number} index The index of the ship in the playerShips array.
+         * Applies all current upgrades to the player.
+         * This function is called at the start of the game and after each upgrade.
          */
-        function displayShipDetails(index) {
-            const ship = playerShips[index];
-            selectedShipImage.src = ship.src;
-            selectedShipName.textContent = ship.name;
+        function applyUpgrades() {
+            const currentTierData = SHIP_TIERS[currentShipTier];
 
-            // Calculate stats including potential individual upgrades if this were the current ship
-            // For display purposes, show base stats of the viewed ship
-            displayHealth.textContent = `${ship.baseHealth} HP`;
-            displayFirepower.textContent = `${ship.baseFirepower} DMG`;
-            displaySpeed.textContent = `${ship.baseSpeed} PX/S`;
-            displayFireRate.textContent = `${ship.baseFireRate} MS`;
+            // Apply base stats from current ship tier
+            player.baseSpeed = currentTierData.baseSpeed;
+            player.baseFirepower = currentTierData.baseFirepower;
+            player.baseFireRate = currentTierData.baseFireRate;
+            player.baseHealth = currentTierData.baseHealth;
+            player.baseWidth = currentTierData.baseWidth;
+            player.baseHeight = currentTierData.baseHeight;
 
-            // If the viewed ship is the currently owned ship, also show current individual upgrade levels
-            if (index === player.currentShipIndex) {
-                displayHealth.textContent += ` (+${player.upgradeLevels.health * 50})`;
-                displayFirepower.textContent += ` (+${player.upgradeLevels.firepower * 5})`;
-                displaySpeed.textContent += ` (+${player.upgradeLevels.speed * 1.5})`;
-                displayFireRate.textContent += ` (Current: ${player.fireRate} MS)`;
+            // Reset player stats to current tier's base stats
+            player.speed = player.baseSpeed;
+            player.firepower = player.baseFirepower;
+            player.fireRate = player.baseFireRate;
+            player.maxHealth = player.baseHealth;
+            player.width = player.baseWidth;
+            player.height = player.baseHeight;
+            player.image = loadedAssets[currentTierData.image]; // Update player image
+
+            // Apply individual health upgrades
+            player.maxHealth += upgradeLevels.health * 100; // +100 max health per level
+            player.heal(upgradeLevels.health * 100); // Also heal by the amount of max health gained
+
+            // Apply individual firepower upgrades
+            player.firepower += upgradeLevels.firepower * 10; // +10 damage per level
+
+            // Apply individual speed upgrades
+            player.speed += upgradeLevels.speed * 1; // +1 speed per level
+
+            // Apply individual size upgrades (visual and hitbox)
+            player.width = player.baseWidth + (upgradeLevels.size * 5); // +5 width per level
+            player.height = player.baseHeight + (upgradeLevels.size * 5); // +5 height per level
+
+            // Apply individual fire rate upgrades (decrease fireRate for faster shooting)
+            player.fireRate = Math.max(50, player.baseFireRate - (upgradeLevels.fireRate * 30)); // -30ms per level
+
+            // Ensure player's current health doesn't exceed new max health
+            player.health = Math.min(player.health, player.maxHealth);
+
+            updateUI();
+            updateShipDisplay(); // Update ship display in upgrade section
+        }
+
+        /**
+         * Updates the ship display in the upgrade section.
+         */
+        let previewShipTier = 0; // The ship tier currently being previewed
+        function updateShipDisplay() {
+            const shipData = SHIP_TIERS[previewShipTier];
+            currentShipImage.src = shipData.image;
+            currentShipName.textContent = shipData.name;
+            shipBaseHealth.textContent = shipData.baseHealth;
+            shipBaseFirepower.textContent = shipData.baseFirepower;
+            shipBaseSpeed.textContent = shipData.baseSpeed;
+            shipBaseSize.textContent = shipData.baseWidth + 'x' + shipData.baseHeight; // Display width x height
+
+            // Enable/disable navigation buttons
+            prevShipBtn.disabled = previewShipTier === 0;
+            nextShipBtn.disabled = previewShipTier === SHIP_TIERS.length - 1;
+
+            // Show upgrade button if previewed ship is the next tier and not maxed
+            if (previewShipTier === currentShipTier + 1 && currentShipTier < SHIP_TIERS.length - 1) {
+                upgradeShipTierBtn.style.display = 'block';
+                shipTierCostDisplay.textContent = SHIP_TIERS[previewShipTier].cost;
+                upgradeShipTierBtn.disabled = gold < SHIP_TIERS[previewShipTier].cost;
+            } else {
+                upgradeShipTierBtn.style.display = 'none';
             }
 
-            // Update button states based on the *viewed* ship
-            checkUpgradeButtonStates();
+            // If the previewed ship is the current ship, hide upgrade button
+            if (previewShipTier === currentShipTier) {
+                upgradeShipTierBtn.style.display = 'none';
+            }
+            // If the previewed ship is already max tier, show MAX
+            if (currentShipTier === SHIP_TIERS.length - 1) {
+                upgradeShipTierBtn.style.display = 'block'; // Show button to indicate max
+                shipTierCostDisplay.textContent = 'MAX';
+                upgradeShipTierBtn.disabled = true;
+            }
         }
+
 
         // --- Event Listeners ---
 
@@ -1549,7 +1495,8 @@
             if (e.touches.length > 0) {
                 touchStartX = e.touches[0].clientX;
                 // Simple tap to shoot
-                if (gameActive && (Date.now() - player.lastShotTime > player.fireRate)) {
+                const currentFireRate = player.rapidFireActive ? player.fireRate / 2 : player.fireRate;
+                if (gameActive && (Date.now() - player.lastShotTime > currentFireRate)) {
                     player.shoot();
                     player.lastShotTime = Date.now();
                 }
@@ -1584,134 +1531,161 @@
         // Upgrade buttons
         upgradeHealthBtn.addEventListener('click', () => {
             const cost = getIndividualUpgradeCost('health');
-            if (gold >= cost && player.upgradeLevels.health < MAX_INDIVIDUAL_UPGRADE_LEVEL) {
+            if (gold >= cost && upgradeLevels.health < MAX_INDIVIDUAL_UPGRADE_LEVEL) {
                 gold -= cost;
-                player.upgradeLevels.health++;
-                player.loadShipStats(); // Reapply stats to update maxHealth and current health
-                player.heal(50); // Heal a bit on health upgrade
-                showMessage(`Health upgraded! Current Max Health: ${player.maxHealth}.`);
-            } else if (player.upgradeLevels.health >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
-                showMessage("Health upgrade is MAXED out for this ship!");
+                upgradeLevels.health++;
+                applyUpgrades();
+                updateUpgradeButtonCosts();
+                checkUpgradeButtonStates();
+                updateUI();
+                showMessage(`Health upgraded! Current Max Health: ${player.maxHealth}.`, 'success');
+            } else if (upgradeLevels.health >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
+                showMessage(`Health is already MAX level!`, 'info');
             } else {
-                showMessage(`Not enough gold for Health upgrade! Need ${cost - gold} more.`);
+                showMessage(`Not enough gold for Health upgrade! Need ${cost - gold} more.`, 'warning');
             }
-            updateUI();
-            updateUpgradeButtonCosts();
-            checkUpgradeButtonStates();
-            displayShipDetails(viewedShipIndex); // Update displayed stats
         });
 
         upgradeFirepowerBtn.addEventListener('click', () => {
             const cost = getIndividualUpgradeCost('firepower');
-            if (gold >= cost && player.upgradeLevels.firepower < MAX_INDIVIDUAL_UPGRADE_LEVEL) {
+            if (gold >= cost && upgradeLevels.firepower < MAX_INDIVIDUAL_UPGRADE_LEVEL) {
                 gold -= cost;
-                player.upgradeLevels.firepower++;
-                player.loadShipStats();
-                showMessage(`Firepower upgraded! Current Damage: ${player.firepower}, Fire Rate: ${player.fireRate}ms.`);
-            } else if (player.upgradeLevels.firepower >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
-                showMessage("Firepower upgrade is MAXED out for this ship!");
+                upgradeLevels.firepower++;
+                applyUpgrades();
+                updateUpgradeButtonCosts();
+                checkUpgradeButtonStates();
+                updateUI();
+                showMessage(`Firepower upgraded! Current Damage: ${player.firepower}.`, 'success');
+            } else if (upgradeLevels.firepower >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
+                showMessage(`Firepower is already MAX level!`, 'info');
             } else {
-                showMessage(`Not enough gold for Firepower upgrade! Need ${cost - gold} more.`);
+                showMessage(`Not enough gold for Firepower upgrade! Need ${cost - gold} more.`, 'warning');
             }
-            updateUI();
-            updateUpgradeButtonCosts();
-            checkUpgradeButtonStates();
-            displayShipDetails(viewedShipIndex); // Update displayed stats
         });
 
         upgradeSpeedBtn.addEventListener('click', () => {
             const cost = getIndividualUpgradeCost('speed');
-            if (gold >= cost && player.upgradeLevels.speed < MAX_INDIVIDUAL_UPGRADE_LEVEL) {
+            if (gold >= cost && upgradeLevels.speed < MAX_INDIVIDUAL_UPGRADE_LEVEL) {
                 gold -= cost;
-                player.upgradeLevels.speed++;
-                player.loadShipStats();
-                showMessage(`Speed upgraded! Current Speed: ${player.speed}.`);
-            } else if (player.upgradeLevels.speed >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
-                showMessage("Speed upgrade is MAXED out for this ship!");
+                upgradeLevels.speed++;
+                applyUpgrades();
+                updateUpgradeButtonCosts();
+                checkUpgradeButtonStates();
+                updateUI();
+                showMessage(`Speed upgraded! Current Speed: ${player.speed}.`, 'success');
+            } else if (upgradeLevels.speed >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
+                showMessage(`Speed is already MAX level!`, 'info');
             } else {
-                showMessage(`Not enough gold for Speed upgrade! Need ${cost - gold} more.`);
+                showMessage(`Not enough gold for Speed upgrade! Need ${cost - gold} more.`, 'warning');
             }
-            updateUI();
-            updateUpgradeButtonCosts();
-            checkUpgradeButtonStates();
-            displayShipDetails(viewedShipIndex); // Update displayed stats
         });
 
-        buyNewShipBtn.addEventListener('click', () => {
-            // This button now buys the `viewedShipIndex` if it's a new ship
-            if (viewedShipIndex > player.currentShipIndex && viewedShipIndex < playerShips.length) {
-                const cost = playerShips[viewedShipIndex].cost;
+        upgradeSizeBtn.addEventListener('click', () => {
+            const cost = getIndividualUpgradeCost('size');
+            if (gold >= cost && upgradeLevels.size < MAX_INDIVIDUAL_UPGRADE_LEVEL) {
+                gold -= cost;
+                upgradeLevels.size++;
+                applyUpgrades();
+                updateUpgradeButtonCosts();
+                checkUpgradeButtonStates();
+                updateUI();
+                showMessage(`Spaceship size upgraded! You're getting bigger!`, 'success');
+            } else if (upgradeLevels.size >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
+                showMessage(`Size is already MAX level!`, 'info');
+            } else {
+                showMessage(`Not enough gold for Size upgrade! Need ${cost - gold} more.`, 'warning');
+            }
+        });
+
+        upgradeFireRateBtn.addEventListener('click', () => {
+            const cost = getIndividualUpgradeCost('fireRate');
+            if (gold >= cost && upgradeLevels.fireRate < MAX_INDIVIDUAL_UPGRADE_LEVEL) {
+                gold -= cost;
+                upgradeLevels.fireRate++;
+                applyUpgrades();
+                updateUpgradeButtonCosts();
+                checkUpgradeButtonStates();
+                updateUI();
+                showMessage(`Fire Rate upgraded! Current Delay: ${player.fireRate}ms.`, 'success');
+            } else if (upgradeLevels.fireRate >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
+                showMessage(`Fire Rate is already MAX level!`, 'info');
+            } else {
+                showMessage(`Not enough gold for Fire Rate upgrade! Need ${cost - gold} more.`, 'warning');
+            }
+        });
+
+        upgradeShipTierBtn.addEventListener('click', () => {
+            const nextTier = currentShipTier + 1;
+            if (nextTier < SHIP_TIERS.length) {
+                const cost = SHIP_TIERS[nextTier].cost;
                 if (gold >= cost) {
                     gold -= cost;
-                    player.currentShipIndex = viewedShipIndex; // Set player's ship to the viewed one
-                    player.upgradeLevels = { health: 0, firepower: 0, speed: 0 }; // Reset individual upgrades for new ship
-                    player.loadShipStats(); // Load new ship's base stats and reset individual upgrades
-                    player.health = player.maxHealth; // Fully heal on new ship purchase
-                    showMessage(`Congratulations! You bought the ${playerShips[player.currentShipIndex].name}!`);
+                    currentShipTier = nextTier;
+                    // Reset individual upgrades when upgrading ship tier
+                    upgradeLevels = { health: 0, firepower: 0, speed: 0, size: 0, fireRate: 0 };
+                    applyUpgrades();
+                    updateUpgradeButtonCosts();
+                    checkUpgradeButtonStates();
+                    updateUI();
+                    previewShipTier = currentShipTier; // Reset preview to current ship
+                    updateShipDisplay();
+                    showMessage(`Upgraded to ${SHIP_TIERS[currentShipTier].name}! All individual upgrades reset.`, 'success');
                 } else {
-                    showMessage(`Not enough gold to buy the ${playerShips[viewedShipIndex].name}! Need ${cost - gold} more.`);
+                    showMessage(`Not enough gold to upgrade to ${SHIP_TIERS[nextTier].name}! Need ${cost - gold} more.`, 'warning');
                 }
             } else {
-                showMessage("You already own this ship or there are no more ships to buy!");
+                showMessage("You have the best ship available!", 'info');
             }
-            updateUI();
-            updateUpgradeButtonCosts();
-            checkUpgradeButtonStates();
-            displayShipDetails(viewedShipIndex); // Update displayed stats
         });
 
         // Ship navigation buttons
         prevShipBtn.addEventListener('click', () => {
-            if (viewedShipIndex > 0) {
-                viewedShipIndex--;
-                displayShipDetails(viewedShipIndex);
+            if (previewShipTier > 0) {
+                previewShipTier--;
+                updateShipDisplay();
             }
         });
 
         nextShipBtn.addEventListener('click', () => {
-            if (viewedShipIndex < playerShips.length - 1) {
-                viewedShipIndex++;
-                displayShipDetails(viewedShipIndex);
+            if (previewShipTier < SHIP_TIERS.length - 1) {
+                previewShipTier++;
+                updateShipDisplay();
             }
         });
 
-        // Redeem Code functionality
+        // Redeem code logic
         redeemCodeBtn.addEventListener('click', () => {
             const code = redeemCodeInput.value.trim().toUpperCase();
             if (code === "RAAJ") {
                 gold += 1000;
-                showMessage("Code 'RAAJ' redeemed! You received 1000 gold!");
+                showMessage("Code 'RAAJ' redeemed! You received 1000 gold!", 'success');
+                redeemCodeInput.value = '';
             } else if (code === "TONY") {
                 gold += 90000;
-                showMessage("Code 'TONY' redeemed! You received 90000 gold! You're rich!");
+                showMessage("Code 'TONY' redeemed! You received 90000 gold! You are rich!", 'success');
+                redeemCodeInput.value = '';
             } else {
-                showMessage("Invalid redeem code. Please try again.");
+                showMessage("Invalid redeem code.", 'danger');
             }
-            redeemCodeInput.value = ''; // Clear input
             updateUI();
             checkUpgradeButtonStates();
         });
 
+
         // --- Initial Setup ---
         window.onload = function() {
-            preloadAssets(); // Start preloading images
+            preloadAssets().then(() => {
+                // Hide preloader with a slight delay for effect
+                setTimeout(() => {
+                    preloader.classList.add('preloader-hidden');
+                    // Initialize game after preloader hides
+                    setTimeout(() => {
+                        preloader.style.display = 'none';
+                        initializeGame();
+                    }, 1000); // Wait for transition to finish
+                }, 1000); // Show preloader for at least 1 second
+            });
         };
-
-        // Adjust canvas size on window resize
-        window.addEventListener('resize', () => {
-            if (gameActive) {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                // Adjust player position to stay centered if canvas resizes during game
-                player.x = canvas.width / 2 - player.width / 2;
-                player.y = canvas.height - player.height - 20;
-            } else {
-                // In menu mode, revert to fixed canvas size or responsive within wrapper
-                const gameAreaWidth = gameWrapper.clientWidth - (2 * 16); // Wrapper padding 2rem = 32px, so 16px each side
-                canvas.width = Math.min(600, gameAreaWidth); // Keep max width at 600px
-                canvas.height = canvas.width * (400 / 600); // Maintain aspect ratio
-            }
-        });
     </script>
 </body>
 </html>
