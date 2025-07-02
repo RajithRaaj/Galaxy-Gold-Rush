@@ -414,30 +414,28 @@
 
         <div class="ship-model-section">
             <h2 class="text-2xl font-bold text-white">Ship Models</h2>
-            <div class="ship-model-display">
-                <div class="flex items-center justify-center w-full">
-                    <button id="prevShipBtn" class="nav-button bg-gray-700 hover:bg-gray-600 w-10 h-10 p-0 rounded-full flex items-center justify-center text-lg">&lt;</button>
-                    <img id="currentShipImage" src="" alt="Spaceship" class="mx-4">
-                    <button id="nextShipBtn" class="nav-button bg-gray-700 hover:bg-gray-600 w-10 h-10 p-0 rounded-full flex items-center justify-center text-lg">&gt;</button>
-                </div>
-                <h3 id="currentShipName" class="text-xl font-semibold text-white"></h3>
-                <table class="ship-stats-table">
-                    <thead>
-                        <tr>
-                            <th>Stat</th>
-                            <th>Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Base Health</td><td id="shipBaseHealth"></td></tr>
-                        <tr><td>Base Firepower</td><td id="shipBaseFirepower"></td></tr>
-                        <tr><td>Base Speed</td><td id="shipBaseSpeed"></td></tr>
-                    </tbody>
-                </table>
-                <button id="upgradeShipModelBtn" class="upgrade-button bg-purple-600 hover:bg-purple-700">
-                    Upgrade Ship Model (<span id="shipModelCost">0</span> 💰)
-                </button>
+            <div class="flex items-center justify-center w-full">
+                <button id="prevShipBtn" class="nav-button bg-gray-700 hover:bg-gray-600 w-10 h-10 p-0 rounded-full flex items-center justify-center text-lg">&lt;</button>
+                <img id="currentShipImage" src="" alt="Spaceship" class="mx-4">
+                <button id="nextShipBtn" class="nav-button bg-gray-700 hover:bg-gray-600 w-10 h-10 p-0 rounded-full flex items-center justify-center text-lg">&gt;</button>
             </div>
+            <h3 id="currentShipName" class="text-xl font-semibold text-white"></h3>
+            <table class="ship-stats-table">
+                <thead>
+                    <tr>
+                        <th>Stat</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Base Health</td><td id="shipBaseHealth"></td></tr>
+                    <tr><td>Base Firepower</td><td id="shipBaseFirepower"></td></tr>
+                    <tr><td>Base Speed</td><td id="shipBaseSpeed"></td></tr>
+                </tbody>
+            </table>
+            <button id="upgradeShipModelBtn" class="upgrade-button bg-purple-600 hover:bg-purple-700">
+                Upgrade Ship Model (<span id="shipModelCost">0</span> 💰)
+            </button>
         </div>
 
         <div class="upgrade-section">
@@ -548,6 +546,9 @@
         let bossTimerInterval = 40000; // 40 seconds
         let lastBossSpawnTime = 0;
 
+        let lastPowerUpDropTime = 0; // New: Tracks last power-up drop time
+        const POWERUP_DROP_INTERVAL = 7000; // New: 7 seconds for power-up drops
+
         // --- Upgrade Costs and Levels ---
         const UPGRADE_BASE_COST = {
             health: 50,
@@ -598,6 +599,8 @@
             boss4: 'https://i.ibb.co/1frCq5bT/Untitled-design-31-removebg-preview.png',
             boss5: 'https://i.ibb.co/gHxGvS7/Untitled-design-32-removebg-preview.png',
             boss6: 'https://i.ibb.co/GfpcdVWR/Untitled-design-33-removebg-preview.png',
+            // New Laser Projectile Image
+            playerBullet: 'https://i.ibb.co/jPz6j2wx/Add-a-subheading-2-removebg-preview.png'
         };
 
         // --- Ship Model Data ---
@@ -619,8 +622,8 @@
         class Player {
             constructor() {
                 // Base dimensions, scaled for visibility. Aim for larger than 85px.
-                this.baseWidth = 100;
-                this.baseHeight = 100;
+                this.baseWidth = 180; // Increased size for player
+                this.baseHeight = 180; // Increased size for player
                 this.width = this.baseWidth;
                 this.height = this.baseHeight;
                 this.x = canvas.width / 2 - this.width / 2;
@@ -701,15 +704,20 @@
                 this.y = y;
                 this.width = 30; // Increased size (from 20)
                 this.height = 60; // Increased size (from 40)
-                this.speed = (type === 'player') ? 20 : 10; // Increased speed for player bullets (from 15/8)
+                this.speed = (type === 'player') ? 25 : 12; // Increased speed for player bullets (from 20/10)
                 this.damage = damage;
-                this.emoji = (type === 'player') ? '⚡' : '🔥'; // Player bullet vs Alien bullet
                 this.type = type; // 'player' or 'alien'
+                this.image = (type === 'player') ? images.playerBullet : null; // Use image for player, emoji for alien
+                this.emoji = (type === 'player') ? null : '🔥'; // Player bullet vs Alien bullet
             }
 
             draw() {
-                ctx.font = `${this.height}px Arial`; // Use height for font size to scale emoji
-                ctx.fillText(this.emoji, this.x, this.y);
+                if (this.type === 'player' && this.image) {
+                    ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+                } else {
+                    ctx.font = `${this.height}px Arial`; // Use height for font size to scale emoji
+                    ctx.fillText(this.emoji, this.x, this.y);
+                }
             }
 
             update() {
@@ -728,8 +736,8 @@
             constructor(x, y, typeData, level) { // Renamed type to typeData for clarity
                 this.x = x;
                 this.y = y;
-                this.width = 90; // Increased size (from 70)
-                this.height = 90; // Increased size (from 70)
+                this.width = 180; // Increased size (from 90) - same as player
+                this.height = 180; // Increased size (from 90) - same as player
                 this.type = typeData; // 'easy', 'medium', 'shooter', 'sticky' etc.
                 this.image = images[typeData.image];
                 this.baseSpeed = typeData.speed;
@@ -768,13 +776,13 @@
 
         // Alien types configuration
         const ALIEN_TYPES = {
-            easy: { image: 'alien1', health: 40, speed: 1.5, goldValue: 10, scoreValue: 100, damage: 0, fireRate: 0 }, // Speed increased
-            medium: { image: 'alien2', health: 60, speed: 2, goldValue: 15, scoreValue: 150, damage: 0, fireRate: 0 }, // Speed increased
-            shooter1: { image: 'alien3', health: 80, speed: 2.5, goldValue: 20, scoreValue: 200, damage: 10, fireRate: 1500 }, // Speed increased
-            shooter2: { image: 'alien4', health: 100, speed: 3, goldValue: 25, scoreValue: 250, damage: 15, fireRate: 1200 }, // Speed increased
-            shooter3: { image: 'alien5', health: 120, speed: 3.5, goldValue: 30, scoreValue: 300, damage: 20, fireRate: 1000 }, // Speed increased
-            shooter4: { image: 'alien6', health: 140, speed: 4, goldValue: 35, scoreValue: 350, damage: 25, fireRate: 800 }, // Speed increased
-            sticky: { image: 'alien5', health: 150, speed: 0, goldValue: 50, scoreValue: 500, damage: 30, fireRate: 700, isSticky: true } // Special sticky alien
+            easy: { image: 'alien1', health: 60, speed: 2, goldValue: 10, scoreValue: 100, damage: 0, fireRate: 0 }, // Health and speed adjusted for larger size
+            medium: { image: 'alien2', health: 90, speed: 2.5, goldValue: 15, scoreValue: 150, damage: 0, fireRate: 0 }, // Health and speed adjusted
+            shooter1: { image: 'alien3', health: 120, speed: 3, goldValue: 20, scoreValue: 200, damage: 15, fireRate: 1500 }, // Health, speed, damage adjusted
+            shooter2: { image: 'alien4', health: 150, speed: 3.5, goldValue: 25, scoreValue: 250, damage: 20, fireRate: 1200 }, // Health, speed, damage adjusted
+            shooter3: { image: 'alien5', health: 180, speed: 4, goldValue: 30, scoreValue: 300, damage: 25, fireRate: 1000 }, // Health, speed, damage adjusted
+            shooter4: { image: 'alien6', health: 210, speed: 4.5, goldValue: 35, scoreValue: 350, damage: 30, fireRate: 800 }, // Health, speed, damage adjusted
+            sticky: { image: 'alien5', health: 250, speed: 0, goldValue: 50, scoreValue: 500, damage: 35, fireRate: 700, isSticky: true } // Health, damage adjusted
         };
 
         /**
@@ -798,14 +806,17 @@
                 this.scoreValue = bossData.scoreValue;
                 this.attackPattern = bossData.attackPattern; // 'straight', 'spread', 'zigzag'
                 this.moveDirection = 1; // 1 for right, -1 for left
+
+                // Explicitly bind the shoot method to the instance
+                this.shoot = this.shoot.bind(this);
             }
 
             draw() {
                 ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
                 // Draw health bar
                 const healthBarWidth = this.width;
-                const healthBarHeight = 20; // Bigger health bar (from 15)
-                const healthBarY = this.y + this.height + 10; // Position below boss
+                const healthBarHeight = 25; // Bigger health bar (from 20)
+                const healthBarY = this.y + this.height + 15; // Position below boss (adjusted)
                 ctx.fillStyle = 'gray';
                 ctx.fillRect(this.x, healthBarY, healthBarWidth, healthBarHeight);
                 ctx.fillStyle = 'red';
@@ -839,9 +850,9 @@
                 if (this.attackPattern === 'straight' || this.attackPattern === 'zigzag') {
                     alienBullets.push(new Bullet(this.x + this.width / 2 - 15, this.y + this.height, this.damage, 'alien'));
                 } else if (this.attackPattern === 'spread') {
-                    alienBullets.push(new Bullet(this.x + this.width / 2 - 60, this.y + this.height, this.damage, 'alien')); // Left bullet
-                    alienBullets.push(new Bullet(this.x + this.width / 2 - 15, this.y + this.height + 20, this.damage, 'alien')); // Middle bullet, slightly lower
-                    alienBullets.push(new Bullet(this.x + this.width / 2 + 30, this.y + this.height, this.damage, 'alien')); // Right bullet
+                    alienBullets.push(new Bullet(this.x + this.width / 2 - 70, this.y + this.height + 10, this.damage, 'alien')); // Left bullet
+                    alienBullets.push(new Bullet(this.x + this.width / 2 - 15, this.y + this.height + 30, this.damage, 'alien')); // Middle bullet, slightly lower
+                    alienBullets.push(new Bullet(this.x + this.width / 2 + 40, this.y + this.height + 10, this.damage, 'alien')); // Right bullet
                 }
             }
 
@@ -853,12 +864,12 @@
 
         // Boss data configuration
         const BOSS_DATA = {
-            boss1: { image: 'boss1', health: 30 * 15, width: 200, height: 200, speed: 2, damage: 20, fireRate: 1000, goldValue: 500, scoreValue: 1000, attackPattern: 'straight' }, // Increased health, size, speed
-            boss2: { image: 'boss2', health: 30 * 18, width: 210, height: 210, speed: 2.2, damage: 25, fireRate: 900, goldValue: 600, scoreValue: 1200, attackPattern: 'zigzag' }, // Increased
-            boss3: { image: 'boss3', health: 30 * 22, width: 220, height: 220, speed: 2.5, damage: 30, fireRate: 800, goldValue: 750, scoreValue: 1500, attackPattern: 'spread' }, // Increased
-            boss4: { image: 'boss4', health: 30 * 25, width: 230, height: 230, speed: 2.7, damage: 35, fireRate: 700, goldValue: 900, scoreValue: 1800, attackPattern: 'zigzag' }, // Increased
-            boss5: { image: 'boss5', health: 30 * 30, width: 240, height: 240, speed: 3, damage: 40, fireRate: 600, goldValue: 1100, scoreValue: 2200, attackPattern: 'spread' }, // Increased
-            boss6: { image: 'boss6', health: 30 * 35, width: 250, height: 250, speed: 3.2, damage: 45, fireRate: 500, goldValue: 1300, scoreValue: 2500, attackPattern: 'straight' } // Increased
+            boss1: { image: 'boss1', health: 30 * 20, width: 220, height: 220, speed: 2.5, damage: 25, fireRate: 1000, goldValue: 500, scoreValue: 1000, attackPattern: 'straight' }, // Increased health, size, speed, damage
+            boss2: { image: 'boss2', health: 30 * 25, width: 230, height: 230, speed: 2.8, damage: 30, fireRate: 900, goldValue: 600, scoreValue: 1200, attackPattern: 'zigzag' }, // Increased
+            boss3: { image: 'boss3', health: 30 * 30, width: 240, height: 240, speed: 3, damage: 35, fireRate: 800, goldValue: 750, scoreValue: 1500, attackPattern: 'spread' }, // Increased
+            boss4: { image: 'boss4', health: 30 * 35, width: 250, height: 250, speed: 3.2, damage: 40, fireRate: 700, goldValue: 900, scoreValue: 1800, attackPattern: 'zigzag' }, // Increased
+            boss5: { image: 'boss5', health: 30 * 40, width: 260, height: 260, speed: 3.5, damage: 45, fireRate: 600, goldValue: 1100, scoreValue: 2200, attackPattern: 'spread' }, // Increased
+            boss6: { image: 'boss6', health: 30 * 45, width: 270, height: 270, speed: 3.8, damage: 50, fireRate: 500, goldValue: 1300, scoreValue: 2500, attackPattern: 'straight' } // Increased
         };
 
         /**
@@ -868,9 +879,9 @@
             constructor(x, y, value) {
                 this.x = x;
                 this.y = y;
-                this.width = 50; // Increased size (from 40)
-                this.height = 50; // Increased size (from 40)
-                this.speed = 4; // Increased speed
+                this.width = 60; // Increased size (from 50)
+                this.height = 60; // Increased size (from 50)
+                this.speed = 5; // Increased speed (from 4)
                 this.value = value;
                 this.emoji = '💰';
             }
@@ -892,9 +903,9 @@
             constructor(x, y, type) {
                 this.x = x;
                 this.y = y;
-                this.width = 70; // Increased size (from 60)
-                this.height = 70; // Increased size (from 60)
-                this.speed = 3; // Increased speed
+                this.width = 80; // Increased size (from 70)
+                this.height = 80; // Increased size (from 70)
+                this.speed = 4; // Increased speed (from 3)
                 this.type = type; // 'nuke', 'doubleShot', 'companion', 'healthBoost', 'shield'
                 this.emoji = this.getEmoji(type);
             }
@@ -942,8 +953,8 @@
                 super(); // Call parent constructor to inherit base properties
                 this.x = x;
                 this.y = y;
-                this.width = 70; // Smaller size for companion (from 50)
-                this.height = 70; // Smaller size for companion (from 50)
+                this.width = 100; // Smaller size for companion (from 70) - still significant
+                this.height = 100; // Smaller size for companion (from 70) - still significant
                 this.firepower = firepower * 0.7; // Slightly less powerful than player
                 this.fireRate = 400; // Slightly slower fire rate
                 this.image = images.playerShip1; // Use basic ship image for companion
@@ -952,8 +963,8 @@
             update() {
                 // Companion ships follow player's X position
                 // Keep companions relative to player, adjusted for new player size
-                this.x = player.x + (this.x < player.x ? -100 : player.width + 20);
-                this.y = player.y + 50; // Stay slightly below player (adjusted from 40)
+                this.x = player.x + (this.x < player.x ? -120 : player.width + 40); // Adjusted for larger player
+                this.y = player.y + 60; // Stay slightly below player (adjusted from 50)
             }
         }
 
@@ -1001,6 +1012,7 @@
             gameSpeedMultiplier = 1;
             currentBoss = null;
             lastBossSpawnTime = 0; // Reset boss timer
+            lastPowerUpDropTime = 0; // Reset power-up timer
 
             // Reset individual upgrade levels but keep current ship model
             upgradeLevels.health = 0;
@@ -1009,6 +1021,7 @@
             // upgradeLevels.shipModel remains as is from previous game/menu state
 
             // Set canvas dimensions based on current CSS computed style
+            // This is done here for initial menu display, but will be re-done in startGame
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
 
@@ -1052,6 +1065,7 @@
             gameSpeedMultiplier = 1;
             currentBoss = null;
             lastBossSpawnTime = Date.now(); // Initialize boss timer on game start
+            lastPowerUpDropTime = Date.now(); // Initialize power-up drop timer on game start
 
             // Reset individual upgrades when starting a new game (but keep ship model)
             upgradeLevels.health = 0;
@@ -1063,9 +1077,10 @@
             gameScreenWrapper.style.display = 'flex';
 
             // Now set canvas dimensions based on its visible parent
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-            console.log(`Canvas dimensions: ${canvas.width}x${canvas.height}`);
+            // This is crucial to get correct width/height after display change
+            canvas.width = gameScreenWrapper.offsetWidth; // Use parent's offsetWidth
+            canvas.height = gameScreenWrapper.offsetHeight; // Use parent's offsetHeight
+            console.log(`Canvas dimensions after display: ${canvas.width}x${canvas.height}`);
 
 
             player = new Player(); // Re-initialize player with current ship model's base stats
@@ -1157,6 +1172,13 @@
                     gameSpeedMultiplier += 0.0005; // Slower increase for more levels
                     alienSpawnInterval = Math.max(200, alienSpawnInterval - 3); // Min interval 200ms
                 }
+
+                // New: Power-up spawning logic (only when no boss)
+                if (currentTime - lastPowerUpDropTime > POWERUP_DROP_INTERVAL) {
+                    spawnRandomPowerUp();
+                    lastPowerUpDropTime = currentTime;
+                }
+
             } else {
                 bossMessage.classList.add('show'); // Keep showing BOSS text
                 currentBoss.update();
@@ -1175,7 +1197,7 @@
                     aliens.splice(i, 1);
                     continue;
                 }
-                // Removed health reduction for aliens going off-screen
+                // Removed health reduction for aliens going off-screen (as per user request)
                 if (!alien.isSticky && alien.y > canvas.height) {
                     aliens.splice(i, 1); // Just remove, no health penalty
                 }
@@ -1247,7 +1269,7 @@
                             if (alien.takeDamage(bullet.damage)) {
                                 score += alien.scoreValue;
                                 gold += alien.goldValue;
-                                coins.push(new Coin(alien.x + alien.width / 2 - 25, alien.y + alien.height / 2 - 25, alien.goldValue)); // Coin size adjusted for larger aliens
+                                coins.push(new Coin(alien.x + alien.width / 2 - 30, alien.y + alien.height / 2 - 30, alien.goldValue)); // Coin size adjusted for larger aliens
                                 aliens.splice(j, 1);
                                 checkUpgradeButtonStates(); // Update button states
                             }
@@ -1302,7 +1324,7 @@
          * Spawns a new alien based on current game level.
          */
         function spawnAlien() {
-            const alienX = Math.random() * (canvas.width - 90); // Adjusted for larger alien size
+            const alienX = Math.random() * (canvas.width - 180); // Adjusted for larger alien size
             let alienTypeData;
             const rand = Math.random();
 
@@ -1328,17 +1350,28 @@
                 alienTypeData = ALIEN_TYPES.sticky;
             }
 
-            aliens.push(new Alien(alienX, -90, alienTypeData, currentLevel)); // Adjusted for larger alien size
+            aliens.push(new Alien(alienX, -180, alienTypeData, currentLevel)); // Adjusted for larger alien size
 
-            // Random chance to drop a power-up
-            if (Math.random() < 0.03) { // 3% chance for any power-up
-                const powerUpTypes = ['doubleShot', 'shield', 'nuke'];
-                if (Math.random() < 0.1) powerUpTypes.push('companion'); // Rarer
-                if (Math.random() < 0.2) powerUpTypes.push('healthBoost'); // More common rare
-                const randomPowerUpType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
-                powerUps.push(new PowerUp(alienX + (alienTypeData.width / 2) - 35, -90, randomPowerUpType)); // Position powerup relative to alien, adjusted for size
-            }
+            // Removed random power-up drop from alien spawn
         }
+
+        /**
+         * Spawns a random power-up at the top of the screen.
+         */
+        function spawnRandomPowerUp() {
+            const powerUpX = Math.random() * (canvas.width - 80); // Adjusted for power-up size
+            const powerUpTypes = ['doubleShot', 'shield', 'nuke'];
+            // Higher probability for healthBoost
+            if (Math.random() < 0.3) { // 30% chance for health boost
+                powerUpTypes.push('healthBoost');
+                powerUpTypes.push('healthBoost'); // Add twice to increase probability
+            }
+            if (Math.random() < 0.1) powerUpTypes.push('companion'); // Rarer
+
+            const randomPowerUpType = powerUpTypes[Math.floor(Math.random() * powerUpTypes.length)];
+            powerUps.push(new PowerUp(powerUpX, -80, randomPowerUpType)); // Position powerup off-screen top
+        }
+
 
         /**
          * Activates a collected power-up.
@@ -1366,8 +1399,8 @@
                     clearTimeout(companionTimer);
                     companionActive = true;
                     companionShips = [
-                        new PlayerCompanion(player.x - 100, player.y + 50, player.firepower), // Adjusted companion position for larger player
-                        new PlayerCompanion(player.x + player.width + 30, player.y + 50, player.firepower) // Adjusted companion position for larger player
+                        new PlayerCompanion(player.x - 120, player.y + 60, player.firepower), // Adjusted companion position for larger player
+                        new PlayerCompanion(player.x + player.width + 40, player.y + 60, player.firepower) // Adjusted companion position for larger player
                     ];
                     messageBox.textContent = "Companion ships deployed! They'll assist you for 10 seconds!";
                     companionTimer = setTimeout(() => {
@@ -1378,8 +1411,8 @@
                     }, 10000); // 10 seconds
                     break;
                 case 'healthBoost':
-                    player.heal(player.maxHealth * 0.2); // Heal by 20% of max health
-                    messageBox.textContent = "Health boosted!";
+                    player.heal(5); // Heal by 5 health points (fixed value)
+                    messageBox.textContent = "Health boosted by 5!";
                     break;
                 case 'shield':
                     clearTimeout(shieldTimer);
@@ -1501,8 +1534,8 @@
             player.health = Math.min(player.maxHealth, player.health); // Don't exceed new max health
 
             // Player size is now determined by the ship image, not a separate upgrade
-            player.width = 100 + (upgradeLevels.shipModel * 25); // Scale size more aggressively (from 80+20)
-            player.height = 100 + (upgradeLevels.shipModel * 25);
+            player.width = 180 + (upgradeLevels.shipModel * 25); // Scale size more aggressively (from 100+25)
+            player.height = 180 + (upgradeLevels.shipModel * 25);
         }
 
         /**
@@ -1741,8 +1774,8 @@
         // Handle window resize for responsive canvas
         window.addEventListener('resize', () => {
             // Always resize the canvas to fit its parent
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
+            canvas.width = gameScreenWrapper.offsetWidth; // Use parent's offsetWidth
+            canvas.height = gameScreenWrapper.offsetHeight; // Use parent's offsetHeight
             // Reposition player to center bottom
             player.x = canvas.width / 2 - player.width / 2;
             player.y = canvas.height - player.height - 40;
