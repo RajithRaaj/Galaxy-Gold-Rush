@@ -3,12 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zarnox - Galactic Gold Rush!</title>
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="Zarnox: Galactic Gold Rush! - A thrilling space shooter game where you destroy aliens, collect gold, and upgrade your spaceship. Survive endless waves and defeat giant bosses!">
-    <meta name="keywords" content="Zarnox, Galactic Gold Rush, space shooter, alien game, spaceship game, arcade, action, gold collection, upgrades, boss fight, free game, online game">
-    <meta name="author" content="Zenora AI">
-    
+    <title>Zarnox - Galactic Gold Rush! | Epic Space Shooter & Upgrade Game</title>
+    <!-- SEO Meta Tags - PRO MAX OPTIMIZED -->
+    <meta name="description" content="Dive into Zarnox: Galactic Gold Rush! – an action-packed, free-to-play space shooter game. Destroy alien hordes, collect gold, and strategically upgrade your spaceship. Survive endless waves, conquer challenging bosses, and climb the leaderboards in this addictive online arcade adventure. Experience intense gameplay, powerful upgrades, and a cosmic journey!">
+    <meta name="keywords" content="Zarnox game, Galactic Gold Rush, space shooter, alien game, spaceship game, arcade, action, gold collection, upgrades, boss fight, free online game, addictive game, space adventure, sci-fi shooter, best mobile game, browser game, Zenora AI, Rajith Raaj">
+    <meta name="author" content="Zenora AI - Rajith Raaj">
+    <meta name="robots" content="index, follow">
+    <meta name="og:title" content="Zarnox - Galactic Gold Rush! | Epic Space Shooter & Upgrade Game">
+    <meta name="og:description" content="Dive into Zarnox: Galactic Gold Rush! – an action-packed, free-to-play space shooter game. Destroy alien hordes, collect gold, and strategically upgrade your spaceship. Survive endless waves, conquer challenging bosses, and climb the leaderboards in this addictive online arcade adventure. Experience intense gameplay, powerful upgrades, and a cosmic journey!">
+    <meta name="og:type" content="game">
+    <meta name="og:url" content="YOUR_GAME_URL_HERE"> <!-- Replace with actual game URL -->
+    <meta name="og:image" content="https://i.ibb.co/CpNDPHHG/Gemini-Generated-Image-rqajpfrqajpfrqaj.png"> <!-- A relevant game screenshot -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Zarnox - Galactic Gold Rush! | Epic Space Shooter & Upgrade Game">
+    <meta name="twitter:description" content="Dive into Zarnox: Galactic Gold Rush! – an action-packed, free-to-play space shooter game. Destroy alien hordes, collect gold, and strategically upgrade your spaceship. Survive endless waves, conquer challenging bosses, and climb the leaderboards in this addictive online arcade adventure. Experience intense gameplay, powerful upgrades, and a cosmic journey!">
+    <meta name="twitter:image" content="https://i.ibb.co/CpNDPHHG/Gemini-Generated-Image-rqajpfrqajpfrqaj.png">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter -->
@@ -23,14 +33,15 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 0; /* Remove padding from body to allow full screen game */
+            padding: 0;
             box-sizing: border-box;
             color: #e2e8f0; /* Light text color */
-            /* Removed overflow: hidden; to allow scrolling on mobile */
             background-image: url('https://i.ibb.co/CpNDPHHG/Gemini-Generated-Image-rqajpfrqajpfrqaj.png');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+            overflow-y: auto; /* Allow scrolling on the body */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
         }
 
         .preloader {
@@ -79,8 +90,7 @@
             gap: 1.5rem;
             position: relative; /* For footer */
             z-index: 1; /* Ensure it's above background */
-            /* Allow scrolling for the main menu content if it overflows on small screens */
-            max-height: 100vh; /* Limit height to viewport */
+            max-height: 95vh; /* Limit height to viewport for scrolling */
             overflow-y: auto; /* Enable vertical scrolling */
             -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
         }
@@ -116,6 +126,7 @@
             margin: 0;
             z-index: 50; /* Above main menu, below preloader */
             transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            overflow: hidden; /* Prevent scrolling during gameplay */
         }
 
         .game-active-full-screen .game-stats {
@@ -159,7 +170,7 @@
             color: #cbd5e0;
         }
 
-        .upgrade-section, .items-section {
+        .upgrade-section, .items-section, .about-section {
             background-color: rgba(44, 62, 80, 0.9); /* Slightly different dark shade with transparency */
             border-radius: 1rem;
             padding: 1.5rem;
@@ -229,6 +240,17 @@
             font-weight: 600;
             display: none;
             word-wrap: break-word; /* Ensure text wraps */
+            position: absolute; /* Position relative to gameWrapper */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 400px;
+            z-index: 100; /* Above other elements */
+            top: 50%; /* Center vertically */
+            transform: translate(-50%, -50%); /* Adjust for true centering */
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            font-size: 1.2rem;
         }
 
         .message-box.show {
@@ -376,7 +398,7 @@
                 font-size: 1.1rem;
                 gap: 0.75rem;
             }
-            .upgrade-section, .items-section {
+            .upgrade-section, .items-section, .about-section {
                 padding: 1rem;
             }
             .upgrade-button, .item-button {
@@ -394,6 +416,10 @@
                 max-width: none;
             }
             .redeem-input {
+                width: 90%;
+            }
+            .message-box {
+                font-size: 1rem;
                 width: 90%;
             }
         }
@@ -528,6 +554,17 @@
             </div>
         </div>
 
+        <!-- About Section -->
+        <div class="about-section">
+            <h2 class="text-3xl font-extrabold text-white mb-4 text-center">Behind the Cosmic Code: The Zenora AI Story</h2>
+            <p class="text-lg text-gray-300 leading-relaxed">
+                My name is Rajith Raaj, and I am the founder of Zenora AI. As a 20-year-old college student with a profound interest in software development, my journey into the world of technology has been entirely self-learned. I believe that cutting-edge tech shouldn't be exclusive; it should be accessible to everyone.
+            </p>
+            <p class="text-lg text-gray-300 leading-relaxed mt-2">
+                This philosophy drives Zenora AI, where our mission is to empower individuals and businesses, from small startups to medium-scale enterprises, by helping them establish a robust and innovative online presence. Through practical insights and a futuristic mindset, I combine my passion for problem-solving with a commitment to making top-class technological solutions available to all. Zarnox: Galactic Gold Rush! is a testament to this vision – a game built with dedication, designed for everyone to enjoy, and optimized to reach players worldwide.
+            </p>
+        </div>
+
         <!-- Buy Coins and Redeem Code Section -->
         <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mt-4">
             <a href="https://tally.so/r/3x7Bl5" target="_blank" class="buy-coins-button">
@@ -617,7 +654,7 @@
         let gameActive = false;
         let score = 0;
         let gold = 0;
-        let player = {}; // Player object
+        let player = null; // Changed from {} to null for proper initialization check
         let playerClones = []; // Array to hold active player clones
         let bullets = []; // Array to hold active player bullets
         let alienBullets = []; // Array to hold active alien bullets
@@ -1459,12 +1496,48 @@
         // --- Game Functions ---
 
         /**
+         * Saves game data to local storage.
+         */
+        function saveGameData() {
+            localStorage.setItem('zarnoxGold', gold);
+            // You can add other game state variables here if you want them to persist
+            // localStorage.setItem('zarnoxScore', score);
+            // localStorage.setItem('zarnoxCurrentWave', currentWave);
+            // localStorage.setItem('zarnoxUpgradeLevels', JSON.stringify(upgradeLevels));
+            // localStorage.setItem('zarnoxCurrentShipTier', currentShipTier);
+            // localStorage.setItem('zarnoxInventory', JSON.stringify(inventory));
+        }
+
+        /**
+         * Loads game data from local storage.
+         */
+        function loadGameData() {
+            const savedGold = localStorage.getItem('zarnoxGold');
+            if (savedGold !== null) {
+                gold = parseInt(savedGold, 10);
+            } else {
+                gold = 0; // Default if no saved data
+            }
+            // Load other data if you implement persistence for them
+            // const savedScore = localStorage.getItem('zarnoxScore');
+            // if (savedScore !== null) score = parseInt(savedScore, 10);
+            // const savedWave = localStorage.getItem('zarnoxCurrentWave');
+            // if (savedWave !== null) currentWave = parseInt(savedWave, 10);
+            // const savedUpgradeLevels = localStorage.getItem('zarnoxUpgradeLevels');
+            // if (savedUpgradeLevels) upgradeLevels = JSON.parse(savedUpgradeLevels);
+            // const savedShipTier = localStorage.getItem('zarnoxCurrentShipTier');
+            // if (savedShipTier !== null) currentShipTier = parseInt(savedShipTier, 10);
+            // const savedInventory = localStorage.getItem('zarnoxInventory');
+            // if (savedInventory) inventory = JSON.parse(savedInventory);
+        }
+
+        /**
          * Initializes or resets the game state.
          */
         function initializeGame() {
             gameActive = false;
-            score = 0;
-            gold = 0;
+            score = 0; // Reset score for new game
+            // Gold is loaded from localStorage and persists
             bullets = [];
             alienBullets = [];
             aliens = [];
@@ -1475,7 +1548,7 @@
             playerClones = [];
             keys = {};
             inGameMessages = [];
-            currentWave = 0;
+            currentWave = 0; // Reset wave for new game
             aliensSpawnedInWave = 0;
             aliensDestroyedInWave = 0;
             alienSpawnInterval = 1500;
@@ -1495,7 +1568,7 @@
             }
 
 
-            // Reset upgrade levels and costs
+            // Reset individual upgrade levels but keep ship tier
             upgradeLevels = {
                 health: 0,
                 firepower: 0,
@@ -1503,7 +1576,8 @@
                 size: 0,
                 fireRate: 0
             };
-            currentShipTier = 0; // Start with the first ship
+            // currentShipTier remains from previous session if loaded, otherwise 0
+            // inventory remains from previous session if loaded, otherwise 0
 
             player = new Player(SHIP_TIERS[currentShipTier]); // Create new player instance with current tier
             applyUpgrades(); // Apply initial upgrades (none at start)
@@ -1516,8 +1590,9 @@
             showMessage("Welcome, pilot! Destroy aliens, collect gold, and upgrade your ship! Use A/D or Left/Right arrows to move. Your ship shoots automatically!", 'info');
             startButton.style.display = 'block';
             gameScreen.classList.remove('game-active-full-screen');
-            gameScreen.classList.remove('hidden'); // Ensure game screen is visible initially
             gameWrapper.style.padding = '2rem'; // Restore padding for menu view
+            document.body.style.overflowY = 'auto'; // Re-enable body scrolling
+            gameWrapper.style.maxHeight = '95vh'; // Restore max-height for scrolling
         }
 
         /**
@@ -1525,7 +1600,14 @@
          */
         function gameOver() {
             gameActive = false;
-            showMessage(`Game Over! Your Score: ${score}, Waves Completed: ${currentWave}, Gold Collected: ${gold} 💰`, 'danger');
+            // Ensure the game screen is no longer fixed and allows scrolling
+            gameScreen.classList.remove('game-active-full-screen');
+            gameWrapper.style.padding = '2rem'; // Restore padding
+            document.body.style.overflowY = 'auto'; // Re-enable body scrolling
+            gameWrapper.style.maxHeight = '95vh'; // Restore max-height for scrolling
+
+            showMessage(`GAME OVER!\nScore: ${score}\nWaves Completed: ${currentWave}\nGold Collected: ${gold} 💰`, 'danger');
+            saveGameData(); // Save gold on game over
 
             // Clear all game entities
             bullets = [];
@@ -1563,7 +1645,7 @@
         function startGame() {
             gameActive = true;
             score = 0;
-            gold = 0;
+            // Gold persists, so no reset here
             bullets = [];
             alienBullets = [];
             aliens = [];
@@ -1608,6 +1690,8 @@
             // Transition to full screen game view
             gameScreen.classList.add('game-active-full-screen');
             gameWrapper.style.padding = '0'; // Remove padding for full screen game
+            document.body.style.overflowY = 'hidden'; // Disable body scrolling during gameplay
+            gameWrapper.style.maxHeight = '100vh'; // Max height for full screen
             resizeCanvas(); // Adjust canvas size to full screen
             window.addEventListener('resize', resizeCanvas); // Listen for resize events
 
@@ -1629,7 +1713,16 @@
          * The main game loop, updates game state and redraws elements.
          */
         function gameLoop() {
-            if (!gameActive) return;
+            if (!gameActive) {
+                return;
+            }
+
+            // Defensive check for player object existence and validity
+            if (!player || typeof player.update !== 'function') {
+                console.error("Player object is not properly initialized. Stopping game loop.");
+                gameActive = false; // Prevent further errors
+                return;
+            }
 
             ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
 
@@ -1754,6 +1847,7 @@
                         updateUI();
                         checkUpgradeButtonStates();
                         updateItemDisplay();
+                        saveGameData(); // Save gold after alien killed
                     }
                 }
             }
@@ -1778,6 +1872,7 @@
                     checkUpgradeButtonStates(); // Recheck upgrade buttons after collecting gold
                     updateItemDisplay(); // Recheck item buttons after collecting gold
                     inGameMessages.push(new InGameMessage(player.x + player.width / 2, player.y, `+${coin.value} Gold!`, 'gold'));
+                    saveGameData(); // Save gold after collecting coin
                     continue;
                 }
 
@@ -1832,6 +1927,7 @@
                         aliensDestroyedInWave = ALIENS_PER_WAVE;
                         aliensSpawnedInWave = ALIENS_PER_WAVE;
                         inGameMessages.push(new InGameMessage(canvas.width / 2, canvas.height / 2, "BOSS DEFEATED!", 'gold', 3000));
+                        saveGameData(); // Save gold after boss defeated
                     }
                     bulletHit = true;
                 }
@@ -1851,8 +1947,9 @@
                                 coins.push(new Coin(alien.x + alien.width / 2 - 12.5, alien.y + alien.height / 2 - 12.5, alien.goldValue));
                                 aliens.splice(j, 1); // Remove alien
                                 updateUI();
-                                checkUpgradeButtonStates();
-                                updateItemDisplay();
+                                checkUpgradeButtonStates(); // Recheck upgrade buttons after earning gold
+                                updateItemDisplay(); // Recheck item buttons after earning gold
+                                saveGameData(); // Save gold after alien destroyed
                             }
                             bulletHit = true;
                             break; // Bullet hit an alien, no need to check other aliens for this bullet
@@ -1922,10 +2019,12 @@
                 messageBox.style.borderColor = '#63b3ed';
                 messageBox.style.color = '#2c5282';
             }
-            // Hide after a few seconds
-            setTimeout(() => {
-                messageBox.classList.remove('show');
-            }, 3000);
+            // Hide after a few seconds, but for game over, it stays until initializeGame()
+            if (type !== 'danger') {
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                }, 3000);
+            }
         }
 
         /**
@@ -2149,6 +2248,7 @@
                 updateUpgradeButtonCosts();
                 checkUpgradeButtonStates();
                 updateUI();
+                saveGameData(); // Save gold after upgrade
                 showMessage(`Health upgraded! Current Max Health: ${player.maxHealth}.`, 'success');
             } else if (upgradeLevels.health >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
                 showMessage(`Health is already MAX level!`, 'info');
@@ -2166,6 +2266,7 @@
                 updateUpgradeButtonCosts();
                 checkUpgradeButtonStates();
                 updateUI();
+                saveGameData(); // Save gold after upgrade
                 showMessage(`Firepower upgraded! Current Damage: ${player.firepower}.`, 'success');
             } else if (upgradeLevels.firepower >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
                 showMessage(`Firepower is already MAX level!`, 'info');
@@ -2183,6 +2284,7 @@
                 updateUpgradeButtonCosts();
                 checkUpgradeButtonStates();
                 updateUI();
+                saveGameData(); // Save gold after upgrade
                 showMessage(`Speed upgraded! Current Speed: ${player.speed}.`, 'success');
             } else if (upgradeLevels.speed >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
                 showMessage(`Speed is already MAX level!`, 'info');
@@ -2200,6 +2302,7 @@
                 updateUpgradeButtonCosts();
                 checkUpgradeButtonStates();
                 updateUI();
+                saveGameData(); // Save gold after upgrade
                 showMessage(`Spaceship size upgraded! You're getting bigger!`, 'success');
             } else if (upgradeLevels.size >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
                 showMessage(`Size is already MAX level!`, 'info');
@@ -2217,6 +2320,7 @@
                 updateUpgradeButtonCosts();
                 checkUpgradeButtonStates();
                 updateUI();
+                saveGameData(); // Save gold after upgrade
                 showMessage(`Fire Rate upgraded! Current Delay: ${player.fireRate}ms.`, 'success');
             } else if (upgradeLevels.fireRate >= MAX_INDIVIDUAL_UPGRADE_LEVEL) {
                 showMessage(`Fire Rate is already MAX level!`, 'info');
@@ -2240,6 +2344,7 @@
                     updateUI();
                     previewShipTier = currentShipTier; // Reset preview to current ship
                     updateShipDisplay();
+                    saveGameData(); // Save gold after upgrade
                     showMessage(`Upgraded to ${SHIP_TIERS[currentShipTier].name}! All individual upgrades reset.`, 'success');
                 } else {
                     showMessage(`Not enough gold to upgrade to ${SHIP_TIERS[nextShipTier].name}! Need ${cost - gold} more.`, 'warning');
@@ -2281,6 +2386,7 @@
             updateUI();
             checkUpgradeButtonStates();
             updateItemDisplay();
+            saveGameData(); // Save gold after redeem
         });
 
         // Item purchase buttons
@@ -2296,6 +2402,7 @@
                 inventory[itemType]++;
                 updateUI();
                 updateItemDisplay();
+                saveGameData(); // Save gold after item purchase
                 showMessage(`Bought ${itemType.charAt(0).toUpperCase() + itemType.slice(1)}!`, 'success');
             } else {
                 showMessage(`Not enough gold to buy ${itemType}! Need ${item.cost - gold} more.`, 'warning');
@@ -2379,6 +2486,7 @@
                         updateItemDisplay();
                     }
                 }
+                saveGameData(); // Save gold after item use (if gold changes due to item, though not directly for these items)
             } else {
                 showMessage(`No ${itemType} left! Buy more.`, 'warning');
             }
@@ -2394,6 +2502,7 @@
                     // Initialize game after preloader hides
                     setTimeout(() => {
                         preloader.style.display = 'none';
+                        loadGameData(); // Load gold before initializing game
                         initializeGame();
                     }, 1000); // Wait for transition to finish
                 }, 1000); // Show preloader for at least 1 second
